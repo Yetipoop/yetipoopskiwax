@@ -10,8 +10,8 @@
   --teal-dark:    #d96a28;
   --teal-dim:     #7a3a18;
   --orange:       #F7813E;
-  --text:         #fcead3;
-  --text-muted:   #fcead3;
+  --text:         #fffce3;
+  --text-muted:   #fffce3;
   --border:       #2e4559;
   --sold-out:     #c0392b;
   --font-head:    'Quicksand', sans-serif;
@@ -101,7 +101,6 @@ nav {
   font-size: 0.875rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-weight: 500;
   transition: color 0.2s;
 }
 
@@ -144,7 +143,7 @@ nav {
 }
 
 .hero h1 {
-  color: var(--text);
+  color: var(--teal);
   margin-bottom: 1rem;
   font-weight: 400;
   font-size: clamp(1.6rem, 4vw, 3rem);
@@ -268,7 +267,6 @@ nav {
 .product-card-price {
   color: var(--teal);
   font-size: 0.95rem;
-  font-weight: 600;
 }
 
 .product-card-badge {
@@ -399,7 +397,7 @@ nav {
   background: var(--bg);
 }
 
-.cart-item-name { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+.cart-item-name { font-size: 0.9rem; margin-bottom: 0.2rem; }
 .cart-item-variant { font-size: 0.8rem; color: var(--text-muted); }
 .cart-item-price { font-size: 0.9rem; color: var(--teal); margin-top: 0.3rem; }
 
@@ -482,7 +480,6 @@ nav {
 .product-price {
   font-size: 1.5rem;
   color: var(--teal);
-  font-weight: 600;
   margin-bottom: 1.5rem;
 }
 
