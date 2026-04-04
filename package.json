@@ -1,0 +1,14 @@
+{
+  "name": "yetipoopskiwax",
+  "version": "1.0.0",
+  "description": "Yeti Poop Ski Wax — Official Store",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "stripe": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yeti Poop Ski Wax — Kirkwood, CA</title>
+  <meta name="description" content="Premium ski wax. Always sold out. Merch available.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/images/logo-dark.png">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="/">
+        <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
+      </a>
+      <ul class="nav-links">
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/wax.html" class="wax-link">The Wax</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <img class="hero-logo" src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
+      <h1>YETI POOP<br><span>SKI WAX</span></h1>
+      <p class="hero-sub">The wax that serious skiers trust. Currently sold out. The merch is not.</p>
+      <div class="hero-cta">
+        <a href="/shop.html" class="btn btn-primary">Shop Merch</a>
+        <a href="/wax.html" class="btn btn-outline">About the Wax</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="section">
+    <div class="container">
+      <h2 class="text-center mb-4">Gear</h2>
+      <div class="product-grid" id="featured-products">
+        <div class="loading">Loading</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRAND STATEMENT -->
+  <section class="section" style="background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+    <div class="container text-center">
+      <h2 class="mb-2">Kirkwood, CA</h2>
+      <p class="text-muted" style="margin: 0 auto;">
+        Born on the mountain. Not available anywhere else.
+        The wax is always sold out. The people who know, know.
+      </p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
+      </div>
+      <ul class="footer-links">
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/wax.html">The Wax</a></li>
+        <li><a href="mailto:yetipoopskiwax@gmail.com">Contact</a></li>
+      </ul>
+    </div>
+    <div class="container">
+      <p class="footer-copy">&copy; 2026 Yeti Poop Ski Wax. Kirkwood, CA.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Load featured products (first 3)
+    async function loadFeatured() {
+      const grid = document.getElementById('featured-products');
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        const products = (data.products || []).slice(0, 3);
+        if (!products.length) {
+          grid.innerHTML = '<p class="error-msg text-muted">Check back soon.</p>';
+          return;
+        }
+        grid.innerHTML = products.map(p => {
+          const price = p.variants?.[0]?.price
+            ? '$' + (p.variants[0].price / 100).toFixed(2)
+            : '';
+          const img = p.images?.[0]?.src || '/images/logo-dark.png';
+          return `
+            <a class="product-card" href="/product.html?id=${p.id}">
+              <div class="product-card-img">
+                <img src="${img}" alt="${p.title}" loading="lazy">
+              </div>
+              <div class="product-card-body">
+                <div class="product-card-name">${p.title}</div>
+                <div class="product-card-price">${price}</div>
+              </div>
+            </a>`;
+        }).join('');
+      } catch (e) {
+        grid.innerHTML = '<p class="error-msg text-muted">Check back soon.</p>';
+      }
+    }
+    loadFeatured();
+  </script>
+</body>
+</html>

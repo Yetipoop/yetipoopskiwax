@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product — Yeti Poop Ski Wax</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/images/logo-dark.png">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="/">
+        <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
+      </a>
+      <ul class="nav-links">
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/wax.html" class="wax-link">The Wax</a></li>
+        <li><a href="#" id="cart-icon" onclick="openCart(); return false;">Cart (<span id="cart-count">0</span>)</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- PRODUCT DETAIL -->
+  <div class="container">
+    <div id="product-detail" class="loading">Loading</div>
+  </div>
+
+  <!-- CART OVERLAY -->
+  <div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+
+  <!-- CART DRAWER -->
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-header">
+      <h3>Cart</h3>
+      <button class="cart-close" onclick="closeCart()">&times;</button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div class="cart-empty">Your cart is empty.</div>
+    </div>
+    <div class="cart-footer" id="cart-footer" style="display:none;">
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cart-total">$0.00</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%; font-size:1.1rem;" onclick="checkout()">Checkout</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="margin-top: 4rem;">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
+      </div>
+      <ul class="footer-links">
+        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/wax.html">The Wax</a></li>
+        <li><a href="mailto:yetipoopskiwax@gmail.com">Contact</a></li>
+      </ul>
+    </div>
+    <div class="container">
+      <p class="footer-copy">&copy; 2026 Yeti Poop Ski Wax. Kirkwood, CA.</p>
+    </div>
+  </footer>
+
+  <script src="/js/cart.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('id');
+    let currentProduct = null;
+    let selectedOptions = {};
+
+    async function loadProduct() {
+      const container = document.getElementById('product-detail');
+      if (!productId) {
+        container.innerHTML = '<p class="error-msg text-muted">Product not found. <a href="/shop.html">Back to shop</a></p>';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/products/${productId}`);
+        const product = await res.json();
+        currentProduct = product;
+        document.title = `${product.title} — Yeti Poop Ski Wax`;
+        renderProduct(product);
+      } catch (e) {
+        container.innerHTML = '<p class="error-msg text-muted">Product not found. <a href="/shop.html">Back to shop</a></p>';
+      }
+    }
+
+    function renderProduct(p) {
+      const mainImg = p.images?.[0]?.src || '/images/logo-dark.png';
+      const price = p.variants?.[0]?.price
+        ? '$' + (p.variants[0].price / 100).toFixed(2)
+        : '';
+
+      // Build options
+      const options = p.options || [];
+      const optionHtml = options.map((opt, oi) => `
+        <div class="mb-2">
+          <div class="option-label">${opt.name}</div>
+          <div class="option-buttons">
+            ${opt.values.map(val => `
+              <button class="option-btn" data-option="${oi}" data-value="${val}"
+                onclick="selectOption(${oi}, '${val}', this)">${val}</button>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      // Thumbnails
+      const thumbHtml = (p.images || []).slice(0, 5).map((img, i) => `
+        <img src="${img.src}" class="product-thumb ${i === 0 ? 'active' : ''}"
+          onclick="changeMainImg('${img.src}', this)" alt="View ${i+1}" loading="lazy">
+      `).join('');
+
+      document.getElementById('product-detail').innerHTML = `
+        <div class="product-detail">
+          <div class="product-images">
+            <div class="product-main-img">
+              <img id="main-img" src="${mainImg}" alt="${p.title}">
+            </div>
+            <div class="product-thumbnails">${thumbHtml}</div>
+          </div>
+          <div class="product-info">
+            <a href="/shop.html" style="font-size:0.8rem; color:var(--text-muted); letter-spacing:0.08em; text-transform:uppercase;">← Shop</a>
+            <h1 style="margin-top:1rem;">${p.title}</h1>
+            <div class="product-price">${price}</div>
+            <div class="product-description">${p.description || ''}</div>
+            ${optionHtml}
+            <button class="add-to-cart-btn" id="atc-btn" onclick="addToCart()" disabled>
+              Select options
+            </button>
+          </div>
+        </div>`;
+    }
+
+    function changeMainImg(src, el) {
+      document.getElementById('main-img').src = src;
+      document.querySelectorAll('.product-thumb').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    function selectOption(optionIndex, value, el) {
+      selectedOptions[optionIndex] = value;
+      // Update button states for this option group
+      document.querySelectorAll(`[data-option="${optionIndex}"]`).forEach(b => b.classList.remove('selected'));
+      el.classList.add('selected');
+      // Enable add to cart if all options selected
+      const totalOptions = (currentProduct.options || []).length;
+      const atcBtn = document.getElementById('atc-btn');
+      if (Object.keys(selectedOptions).length >= totalOptions) {
+        atcBtn.disabled = false;
+        atcBtn.textContent = 'Add to Cart';
+      }
+    }
+
+    function addToCart() {
+      if (!currentProduct) return;
+      // Find matching variant
+      const variant = findVariant();
+      if (!variant) return;
+      const item = {
+        productId: currentProduct.id,
+        variantId: variant.id,
+        title: currentProduct.title,
+        variant: Object.values(selectedOptions).join(' / '),
+        price: variant.price,
+        image: currentProduct.images?.[0]?.src || '/images/logo-dark.png',
+        quantity: 1
+      };
+      addItemToCart(item);
+      openCart();
+    }
+
+    function findVariant() {
+      if (!currentProduct?.variants) return null;
+      const options = currentProduct.options || [];
+      return currentProduct.variants.find(v => {
+        return options.every((opt, i) => {
+          const selectedVal = selectedOptions[i];
+          return v.options?.includes(selectedVal) || v[`option${i+1}`] === selectedVal;
+        });
+      }) || currentProduct.variants[0];
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>
