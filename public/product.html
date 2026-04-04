@@ -106,8 +106,8 @@
           <div class="option-label">${opt.name}</div>
           <div class="option-buttons">
             ${opt.values.map(val => `
-              <button class="option-btn" data-option="${oi}" data-value="${val}"
-                onclick="selectOption(${oi}, '${val}', this)">${val}</button>
+              <button class="option-btn" data-option="${oi}" data-value="${val.title}"
+                onclick="selectOption(${oi}, '${val.title}', this)">${val.title}</button>
             `).join('')}
           </div>
         </div>
@@ -183,8 +183,10 @@
       const options = currentProduct.options || [];
       return currentProduct.variants.find(v => {
         return options.every((opt, i) => {
-          const selectedVal = selectedOptions[i];
-          return v.options?.includes(selectedVal) || v[`option${i+1}`] === selectedVal;
+          const selectedTitle = selectedOptions[i];
+          const selectedValueObj = opt.values.find(val => val.title === selectedTitle);
+          if (!selectedValueObj) return false;
+          return v.options?.includes(selectedValueObj.id);
         });
       }) || currentProduct.variants[0];
     }
