@@ -11,7 +11,7 @@
   --teal-dim:     #7a3a18;
   --orange:       #F7813E;
   --text:         #fcead3;
-  --text-muted:   #c9aa88;
+  --text-muted:   #fcead3;
   --border:       #2e4559;
   --sold-out:     #c0392b;
   --font-head:    'Quicksand', sans-serif;
@@ -109,14 +109,10 @@ nav {
 
 .nav-links .wax-link {
   color: var(--teal);
-  border: 1px solid var(--teal-dim);
-  padding: 0.35rem 0.9rem;
-  border-radius: 2px;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .nav-links .wax-link:hover {
-  background: var(--teal-dim);
   color: var(--text);
 }
 
@@ -138,14 +134,7 @@ nav {
   overflow: hidden;
 }
 
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url('/images/logo-dark.png') center / 600px no-repeat;
-  opacity: 0.04;
-  pointer-events: none;
-}
+.hero::before { display: none; }
 
 .hero-content { position: relative; z-index: 1; }
 
@@ -157,6 +146,9 @@ nav {
 .hero h1 {
   color: var(--text);
   margin-bottom: 1rem;
+  font-weight: 400;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  white-space: nowrap;
 }
 
 .hero h1 span { color: var(--teal); }
