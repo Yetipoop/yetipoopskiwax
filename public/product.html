@@ -139,6 +139,22 @@
             </button>
           </div>
         </div>`;
+
+      // Auto-select any option that has exactly one value (no real choice to make),
+      // then check if all options are satisfied so the button can enable immediately.
+      options.forEach((opt, oi) => {
+        if (opt.values.length === 1) {
+          const btn = document.querySelector(`[data-option="${oi}"]`);
+          if (btn) selectOption(oi, opt.values[0].title, btn);
+        }
+      });
+
+      // If there are no options at all, enable the button right away.
+      if (options.length === 0) {
+        const atcBtn = document.getElementById('atc-btn');
+        atcBtn.disabled = false;
+        atcBtn.textContent = 'Add to Cart';
+      }
     }
 
     function changeMainImg(src, el) {
