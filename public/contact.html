@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Yeti Poop Ski Wax</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/images/logo-dark.png">
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="/">
+        <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
+      </a>
+      <ul class="nav-links">
+        <li><a href="/shop.html">Shop Gear</a></li>
+        <li><a href="/wax.html" class="wax-link">Shop Wax</a></li>
+        <li><a href="/#about">About Us</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- CONTACT -->
+  <section class="section">
+    <div class="container" style="max-width: 600px;">
+      <h1 style="color: var(--teal); font-size: clamp(1.6rem, 4vw, 3rem); font-weight: 400; margin-bottom: 0.5rem;">Contact</h1>
+      <p class="text-muted" style="margin-bottom: 2rem;">Send us a message. We'll get back to you.</p>
+
+      <form id="contact-form">
+        <div style="margin-bottom: 1.25rem;">
+          <label class="option-label" for="contact-name">Your Name</label>
+          <input
+            type="text"
+            id="contact-name"
+            placeholder="Name"
+            required
+            style="width:100%; padding: 0.75rem 1rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 1rem; border-radius: 2px; outline: none; margin-top: 0.4rem;"
+            onfocus="this.style.borderColor='var(--teal)'"
+            onblur="this.style.borderColor='var(--border)'"
+          >
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label class="option-label" for="contact-email">Your Email</label>
+          <input
+            type="email"
+            id="contact-email"
+            placeholder="your@email.com"
+            required
+            style="width:100%; padding: 0.75rem 1rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 1rem; border-radius: 2px; outline: none; margin-top: 0.4rem;"
+            onfocus="this.style.borderColor='var(--teal)'"
+            onblur="this.style.borderColor='var(--border)'"
+          >
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label class="option-label" for="contact-subject">Subject</label>
+          <input
+            type="text"
+            id="contact-subject"
+            placeholder="What's this about?"
+            required
+            style="width:100%; padding: 0.75rem 1rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 1rem; border-radius: 2px; outline: none; margin-top: 0.4rem;"
+            onfocus="this.style.borderColor='var(--teal)'"
+            onblur="this.style.borderColor='var(--border)'"
+          >
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label class="option-label" for="contact-message">Message</label>
+          <textarea
+            id="contact-message"
+            placeholder="Your message..."
+            required
+            rows="6"
+            style="width:100%; padding: 0.75rem 1rem; background: var(--bg-card); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 1rem; border-radius: 2px; outline: none; resize: vertical; margin-top: 0.4rem;"
+            onfocus="this.style.borderColor='var(--teal)'"
+            onblur="this.style.borderColor='var(--border)'"
+          ></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Send Message</button>
+      </form>
+
+      <p id="contact-msg" style="margin-top: 1.25rem; display: none;"></p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
+      </div>
+      <ul class="footer-links">
+        <li><a href="/shop.html">Shop Gear</a></li>
+        <li><a href="/wax.html">Shop Wax</a></li>
+        <li><a href="/contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="container">
+      <p class="footer-copy">&copy; 2026 Yeti Poop Ski Wax. Kirkwood, CA.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('contact-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name    = document.getElementById('contact-name').value.trim();
+      const email   = document.getElementById('contact-email').value.trim();
+      const subject = document.getElementById('contact-subject').value.trim();
+      const message = document.getElementById('contact-message').value.trim();
+      const msg     = document.getElementById('contact-msg');
+      const btn     = this.querySelector('button[type="submit"]');
+
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, subject, message })
+        });
+        if (res.ok) {
+          this.style.display = 'none';
+          msg.textContent = "Message sent. We'll be in touch.";
+          msg.style.color = 'var(--teal)';
+        } else {
+          msg.textContent = 'Something went wrong. Try again.';
+          msg.style.color = 'var(--sold-out)';
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+        }
+      } catch {
+        msg.textContent = 'Something went wrong. Try again.';
+        msg.style.color = 'var(--sold-out)';
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+      }
+      msg.style.display = 'block';
+    });
+  </script>
+
+</body>
+</html>

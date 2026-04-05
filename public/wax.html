@@ -20,8 +20,9 @@
         <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
       </a>
       <ul class="nav-links">
-        <li><a href="/shop.html">Shop</a></li>
-        <li><a href="/wax.html" class="wax-link">The Wax</a></li>
+        <li><a href="/shop.html">Shop Gear</a></li>
+        <li><a href="/wax.html" class="wax-link">Shop Wax</a></li>
+        <li><a href="/#about">About Us</a></li>
       </ul>
     </div>
   </nav>
@@ -31,12 +32,23 @@
     <div>
       <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax" style="width:200px; margin:0 auto 2rem;">
       <h1>YETI POOP SKI WAX</h1>
-      <div class="wax-status">SOLD OUT</div>
+      <div class="wax-status" style="background: rgba(247,129,62,0.1); border-color: rgba(247,129,62,0.4); color: var(--teal);">SOLD OUT</div>
       <p class="wax-copy">
-        We appreciate your interest. We cannot confirm a restock date.
-        The wax speaks for itself. It always has.
+        If you would like to join our wait list to be notified when the next batch of wax will be available, please enter your email address.
       </p>
-      <a href="/shop.html" class="btn btn-outline">Shop Gear Instead</a>
+      <form id="waitlist-form" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; max-width: 480px; margin: 0 auto;">
+        <input
+          type="email"
+          id="waitlist-email"
+          placeholder="your@email.com"
+          required
+          style="flex: 1; min-width: 220px; padding: 0.75rem 1rem; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 1rem; border-radius: 2px; outline: none;"
+          onfocus="this.style.borderColor='var(--teal)'"
+          onblur="this.style.borderColor='var(--border)'"
+        >
+        <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Notify Me</button>
+      </form>
+      <p id="waitlist-msg" style="margin: 1rem auto 0; max-width: 52ch; display: none;"></p>
     </div>
   </section>
 
@@ -47,15 +59,49 @@
         <img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax">
       </div>
       <ul class="footer-links">
-        <li><a href="/shop.html">Shop</a></li>
+        <li><a href="/shop.html">Shop Gear</a></li>
         <li><a href="/wax.html">The Wax</a></li>
-        <li><a href="mailto:yetipoopskiwax@gmail.com">Contact</a></li>
+        <li><a href="/contact.html">Contact</a></li>
       </ul>
     </div>
     <div class="container">
       <p class="footer-copy">&copy; 2026 Yeti Poop Ski Wax. Kirkwood, CA.</p>
     </div>
   </footer>
+
+  <script>
+    document.getElementById('waitlist-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('waitlist-email').value.trim();
+      const msg = document.getElementById('waitlist-msg');
+      const btn = this.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        const res = await fetch('/api/waitlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        if (res.ok) {
+          this.style.display = 'none';
+          msg.textContent = "You're on the list. We'll be in touch.";
+          msg.style.color = 'var(--teal)';
+        } else {
+          msg.textContent = 'Something went wrong. Try again.';
+          msg.style.color = 'var(--sold-out)';
+          btn.disabled = false;
+          btn.textContent = 'Notify Me';
+        }
+      } catch {
+        msg.textContent = 'Something went wrong. Try again.';
+        msg.style.color = 'var(--sold-out)';
+        btn.disabled = false;
+        btn.textContent = 'Notify Me';
+      }
+      msg.style.display = 'block';
+    });
+  </script>
 
 </body>
 </html>
