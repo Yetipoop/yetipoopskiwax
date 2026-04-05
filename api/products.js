@@ -44,12 +44,16 @@ module.exports = async function handler(req, res) {
 
   try {
     const data = await printifyGet(`/v1/shops/${shopId}/products.json?limit=20`, token);
-    // Only show products that have at least one enabled variant.
-    // Printify sets visible:true for all products by default on API-only shops,
-    // so we rely on enabled variants as the published signal instead.
-    const products = (data.data || []).filter(p =>
-      (p.variants || []).some(v => v.enabled)
+
+    // Printify's list endpoint does not reliably expose enabled/published state
+    // for API-connected shops. We show all products by default and use the
+    // HIDDEN_PRODUCT_IDS env var (comma-separated Printify product IDs) to
+    // explicitly exclude products you don't want on the site.
+    const hiddenIds = new Set(
+      (process.env.HIDDEN_PRODUCT_IDS || '').split(',').map(s => s.trim()).filter(Boolean)
     );
+    const products = (data.data || []).filter(p => !hiddenIds.has(String(p.id)));
+
     return res.status(200).json({ products });
   } catch (e) {
     console.error('Printify products error:', e.message);
