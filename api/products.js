@@ -44,7 +44,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const data = await printifyGet(`/v1/shops/${shopId}/products.json?limit=20`, token);
-    const products = (data.data || []).filter(p => p.visible !== false);
+    const products = (data.data || []).filter(p => p.visible === true);
     return res.status(200).json({ products });
   } catch (e) {
     console.error('Printify products error:', e.message);
