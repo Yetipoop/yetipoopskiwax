@@ -40,27 +40,10 @@ module.exports = async function handler(req, res) {
   try {
     const product = await printifyGet(`/v1/shops/${shopId}/products/${id}.json`, token);
 
-    // Strip variants the merchant has disabled in Printify
-    const enabledVariants = (product.variants || []).filter(v => v.enabled);
-
-    // Collect the option-value IDs that appear in any enabled variant.
-    // Coerce everything to String — Printify can return IDs as numbers or strings
-    // and Set.has() is strict-equality, so "123" !== 123 would silently drop values.
-    const enabledValueIds = new Set(
-      enabledVariants.flatMap(v => (v.options || []).map(String))
-    );
-
-    // Trim each option's value list to only enabled values
-    const trimmedOptions = (product.options || []).map(opt => ({
-      ...opt,
-      values: (opt.values || []).filter(val => enabledValueIds.has(String(val.id)))
-    })).filter(opt => opt.values.length > 0);
-
-    return res.status(200).json({
-      ...product,
-      variants: enabledVariants,
-      options: trimmedOptions
-    });
+    // Pass the product through as-is. Printify's enabled field is unreliable
+    // across API contexts — filtering here stripped all variants. Variant
+    // selection is managed directly in the Printify dashboard.
+    return res.status(200).json(product);
   } catch (e) {
     console.error('Printify product error:', e.message);
     return res.status(404).json({ error: 'Product not found' });
