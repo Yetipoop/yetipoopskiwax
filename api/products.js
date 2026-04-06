@@ -52,7 +52,15 @@ module.exports = async function handler(req, res) {
     const hiddenIds = new Set(
       (process.env.HIDDEN_PRODUCT_IDS || '').split(',').map(s => s.trim()).filter(Boolean)
     );
-    const products = (data.data || []).filter(p => !hiddenIds.has(String(p.id)));
+
+    const products = (data.data || [])
+      .filter(p => !hiddenIds.has(String(p.id)))
+      .map(p => {
+        // Filter variants to is_enabled only so product cards show the
+        // correct merchant-set retail price, not a random default variant price.
+        const enabledVariants = (p.variants || []).filter(v => v.is_enabled);
+        return { ...p, variants: enabledVariants.length ? enabledVariants : p.variants };
+      });
 
     return res.status(200).json({ products });
   } catch (e) {
