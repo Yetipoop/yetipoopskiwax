@@ -26,7 +26,7 @@ function addItemToCart(item) {
 }
 
 function removeFromCart(variantId) {
-  cart = cart.filter(i => i.variantId !== variantId);
+  cart = cart.filter(i => String(i.variantId) !== String(variantId));
   saveCart();
   renderCart();
 }
