@@ -40,73 +40,6 @@
     </div>
   </section>
 
-  <!-- FEATURED PRODUCTS -->
-  <section class="section">
-    <div class="container">
-      <h2 class="text-center mb-4" style="color: var(--teal); font-size: clamp(1.6rem, 4vw, 3rem); font-weight: 400;">Gear</h2>
-      <div class="product-grid" id="featured-products">
-        <div class="loading">Loading</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- WAX SECTION -->
-  <section class="section" style="background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
-    <div class="container text-center">
-      <h2 class="mb-2" style="color: var(--teal); font-size: clamp(1.6rem, 4vw, 3rem); font-weight: 400;">Wax</h2>
-      <p class="text-muted" style="margin: 0 auto 1.5rem;">Sold out.</p>
-      <p class="text-muted" style="margin: 0 auto 1.25rem; max-width: 52ch;">
-        If you would like to join our wait list to be notified when the next batch of wax will be available, please enter your email address.
-      </p>
-      <form id="waitlist-form" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; max-width: 480px; margin: 0 auto;">
-        <input
-          type="email"
-          id="waitlist-email"
-          placeholder="your@email.com"
-          required
-          style="flex: 1; min-width: 220px; padding: 0.75rem 1rem; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: var(--font-body); font-size: 1rem; border-radius: 2px; outline: none;"
-          onfocus="this.style.borderColor='var(--teal)'"
-          onblur="this.style.borderColor='var(--border)'"
-        >
-        <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Notify Me</button>
-      </form>
-      <p id="waitlist-msg" style="margin: 1rem auto 0; max-width: 52ch; display: none;"></p>
-    </div>
-  </section>
-
-  <script>
-    document.getElementById('waitlist-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const email = document.getElementById('waitlist-email').value.trim();
-      const msg = document.getElementById('waitlist-msg');
-      const btn = this.querySelector('button[type="submit"]');
-      btn.disabled = true;
-      btn.textContent = '...';
-      try {
-        const res = await fetch('/api/waitlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-        if (res.ok) {
-          this.style.display = 'none';
-          msg.textContent = "You're on the list. We'll be in touch.";
-          msg.style.color = 'var(--teal)';
-        } else {
-          msg.textContent = 'Something went wrong. Try again.';
-          msg.style.color = 'var(--sold-out)';
-          btn.disabled = false;
-          btn.textContent = 'Notify Me';
-        }
-      } catch {
-        msg.textContent = 'Something went wrong. Try again.';
-        msg.style.color = 'var(--sold-out)';
-        btn.disabled = false;
-        btn.textContent = 'Notify Me';
-      }
-      msg.style.display = 'block';
-    });
-  </script>
 
   <!-- ABOUT US -->
   <section id="about" class="section">
@@ -138,39 +71,5 @@
     </div>
   </footer>
 
-  <script>
-    // Load featured products (first 3)
-    async function loadFeatured() {
-      const grid = document.getElementById('featured-products');
-      try {
-        const res = await fetch('/api/products');
-        const data = await res.json();
-        const products = (data.products || []).slice(0, 3);
-        if (!products.length) {
-          grid.innerHTML = '<p class="error-msg text-muted">Check back soon.</p>';
-          return;
-        }
-        grid.innerHTML = products.map(p => {
-          const price = p.variants?.[0]?.price
-            ? '$' + (p.variants[0].price / 100).toFixed(2)
-            : '';
-          const img = p.images?.[0]?.src || '/images/logo-dark.png';
-          return `
-            <a class="product-card" href="/product.html?id=${p.id}">
-              <div class="product-card-img">
-                <img src="${img}" alt="${p.title}" loading="lazy">
-              </div>
-              <div class="product-card-body">
-                <div class="product-card-name">${p.title}</div>
-                <div class="product-card-price">${price}</div>
-              </div>
-            </a>`;
-        }).join('');
-      } catch (e) {
-        grid.innerHTML = '<p class="error-msg text-muted">Check back soon.</p>';
-      }
-    }
-    loadFeatured();
-  </script>
 </body>
 </html>
