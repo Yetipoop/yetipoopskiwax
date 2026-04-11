@@ -171,7 +171,7 @@ module.exports = async function handler(req, res) {
 
     // CRITICAL: Confirm the order to submit for production and trigger Printify charging
     const confirmResult = await printifyPost(
-      `/v1/shops/${shopId}/orders/${printifyOrderId}/confirm.json`,
+      `/v1/shops/${shopId}/orders/${printifyOrderId}/confirm`,
       {},
       printifyToken
     );
