@@ -127,6 +127,7 @@ module.exports = async function handler(req, res) {
 
     // Build Printify order
     const addr = shipping.address;
+    const phone = customer?.phone || shipping.phone || '';
     const order = {
       external_id: session.id,
       label: `Order from ${customer?.email || 'customer'}`,
@@ -141,7 +142,7 @@ module.exports = async function handler(req, res) {
         first_name: shipping.name?.split(' ')[0] || 'Customer',
         last_name: shipping.name?.split(' ').slice(1).join(' ') || '',
         email: customer?.email || shipping.email || '',
-        phone: customer?.phone || shipping.phone || '',
+        phone: phone || '+1', // Printify requires phone; use placeholder if missing
         country: addr?.country || 'US',
         region: addr?.state || '',
         address1: addr?.line1 || '',
