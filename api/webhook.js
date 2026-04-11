@@ -1,9 +1,22 @@
 // POST /api/webhook
-// Handles Stripe payment_intent.succeeded events
+// Handles Stripe checkout.session.completed events
 // Creates the corresponding order in Printify automatically
 
 const Stripe = require('stripe');
 const https = require('https');
+
+async function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.on('data', chunk => {
+      data += chunk.toString();
+    });
+    req.on('end', () => {
+      resolve(data);
+    });
+    req.on('error', reject);
+  });
+}
 
 function printifyPost(path, body, token) {
   return new Promise((resolve, reject) => {
@@ -34,7 +47,10 @@ function printifyPost(path, body, token) {
 }
 
 module.exports = async function handler(req, res) {
+  console.log('[WEBHOOK] Received request:', { method: req.method, url: req.url });
+
   if (req.method !== 'POST') {
+    console.log('[WEBHOOK] Not a POST request, returning 405');
     return res.status(405).end();
   }
 
@@ -43,21 +59,50 @@ module.exports = async function handler(req, res) {
   const printifyToken = process.env.PRINTIFY_API_TOKEN;
   const shopId = process.env.PRINTIFY_SHOP_ID;
 
+  // Get raw body for signature verification
+  // In Vercel with bodyParser: false, req.body might be a Buffer or string
+  // If it's an object, we need to read from the request stream
+  let rawBody;
+  if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) {
+    rawBody = req.body;
+    console.log('[WEBHOOK] Using req.body as raw body, type:', typeof req.body, 'length:', rawBody.length);
+  } else {
+    // Body was already parsed — try to read from stream
+    console.log('[WEBHOOK] Body is parsed object, attempting to read raw stream...');
+    try {
+      rawBody = await getRawBody(req);
+      console.log('[WEBHOOK] Read raw body from stream, length:', rawBody.length);
+    } catch (e) {
+      console.error('[WEBHOOK] Failed to read raw body:', e.message);
+      return res.status(400).json({ error: 'Cannot read request body' });
+    }
+  }
+
+  console.log('[WEBHOOK] Config check:', {
+    hasSecret: !!webhookSecret,
+    hasPrintifyToken: !!printifyToken,
+    shopId,
+    rawBodyLength: rawBody?.length
+  });
+
   // Verify Stripe signature
   let event;
   try {
     const sig = req.headers['stripe-signature'];
-    const rawBody = req.body; // Vercel provides raw body for webhooks
+    console.log('[WEBHOOK] Attempting signature verification...');
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+    console.log('[WEBHOOK] Signature verified successfully. Event type:', event.type);
   } catch (e) {
-    console.error('Webhook signature error:', e.message);
-    return res.status(400).json({ error: 'Invalid signature' });
+    console.error('[WEBHOOK] Signature error:', e.message);
+    return res.status(400).json({ error: 'Invalid signature: ' + e.message });
   }
 
   if (event.type !== 'checkout.session.completed') {
+    console.log('[WEBHOOK] Ignoring event type:', event.type);
     return res.status(200).json({ received: true });
   }
 
+  console.log('[WEBHOOK] Processing checkout.session.completed');
   const session = event.data.object;
 
   try {
@@ -66,8 +111,15 @@ module.exports = async function handler(req, res) {
     const shipping = session.shipping_details;
     const customer = session.customer_details;
 
+    console.log('[WEBHOOK] Session data:', {
+      sessionId: session.id,
+      cartItemCount: cartItems.length,
+      hasShipping: !!shipping?.address,
+      customerEmail: customer?.email
+    });
+
     if (!cartItems.length || !shipping?.address) {
-      console.error('Missing cart or shipping info');
+      console.error('[WEBHOOK] Missing cart or shipping info. Cart:', cartItems, 'Shipping:', shipping?.address);
       return res.status(200).json({ received: true });
     }
 
@@ -96,17 +148,25 @@ module.exports = async function handler(req, res) {
       }
     };
 
+    console.log('[WEBHOOK] Sending order to Printify:', JSON.stringify(order, null, 2));
     const result = await printifyPost(
       `/v1/shops/${shopId}/orders.json`,
       order,
       printifyToken
     );
 
-    console.log(`Printify order created: ${result.body?.id} for session ${session.id}`);
+    console.log('[WEBHOOK] Printify response:', { status: result.status, orderId: result.body?.id, body: JSON.stringify(result.body) });
+
+    if (result.status >= 400) {
+      console.error('[WEBHOOK] Printify error response:', result.status, result.body);
+      return res.status(200).json({ received: true, printifyError: result.body });
+    }
+
+    console.log(`[WEBHOOK] Order created successfully: ${result.body?.id} for session ${session.id}`);
     return res.status(200).json({ received: true, orderId: result.body?.id });
 
   } catch (e) {
-    console.error('Webhook processing error:', e.message);
+    console.error('[WEBHOOK] Webhook processing error:', e.message, e.stack);
     // Still return 200 so Stripe doesn't retry
     return res.status(200).json({ received: true, error: e.message });
   }
