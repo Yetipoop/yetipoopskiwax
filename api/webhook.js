@@ -153,21 +153,38 @@ module.exports = async function handler(req, res) {
     };
 
     console.log('[WEBHOOK] Sending order to Printify:', JSON.stringify(order, null, 2));
-    const result = await printifyPost(
+    const createResult = await printifyPost(
       `/v1/shops/${shopId}/orders.json`,
       order,
       printifyToken
     );
 
-    console.log('[WEBHOOK] Printify response:', { status: result.status, orderId: result.body?.id, body: JSON.stringify(result.body) });
+    console.log('[WEBHOOK] Printify create response:', { status: createResult.status, orderId: createResult.body?.id });
 
-    if (result.status >= 400) {
-      console.error('[WEBHOOK] Printify error response:', result.status, result.body);
-      return res.status(200).json({ received: true, printifyError: result.body });
+    if (createResult.status >= 400) {
+      console.error('[WEBHOOK] Printify create error:', createResult.status, createResult.body);
+      return res.status(200).json({ received: true, printifyError: createResult.body });
     }
 
-    console.log(`[WEBHOOK] Order created successfully: ${result.body?.id} for session ${session.id}`);
-    return res.status(200).json({ received: true, orderId: result.body?.id });
+    const printifyOrderId = createResult.body?.id;
+    console.log(`[WEBHOOK] DRAFT order created: ${printifyOrderId}, now confirming...`);
+
+    // CRITICAL: Confirm the order to submit for production and trigger Printify charging
+    const confirmResult = await printifyPost(
+      `/v1/shops/${shopId}/orders/${printifyOrderId}/confirm.json`,
+      {},
+      printifyToken
+    );
+
+    console.log('[WEBHOOK] Printify confirm response:', { status: confirmResult.status, body: JSON.stringify(confirmResult.body) });
+
+    if (confirmResult.status >= 400) {
+      console.error('[WEBHOOK] Printify confirm error:', confirmResult.status, confirmResult.body);
+      return res.status(200).json({ received: true, orderId: printifyOrderId, confirmError: confirmResult.body });
+    }
+
+    console.log(`[WEBHOOK] Order fully processed: ${printifyOrderId} for session ${session.id}`);
+    return res.status(200).json({ received: true, orderId: printifyOrderId, status: 'confirmed' });
 
   } catch (e) {
     console.error('[WEBHOOK] Webhook processing error:', e.message, e.stack);
