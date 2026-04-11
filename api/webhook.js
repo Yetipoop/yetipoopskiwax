@@ -108,14 +108,16 @@ module.exports = async function handler(req, res) {
   try {
     // Parse cart from session metadata
     const cartItems = JSON.parse(session.metadata?.cart || '[]');
-    const shipping = session.shipping_details;
+    // Shipping can be in two places depending on Stripe API response
+    const shipping = session.shipping_details || session.collected_information?.shipping_details;
     const customer = session.customer_details;
 
     console.log('[WEBHOOK] Session data:', {
       sessionId: session.id,
       cartItemCount: cartItems.length,
       hasShipping: !!shipping?.address,
-      customerEmail: customer?.email
+      customerEmail: customer?.email,
+      shippingSource: shipping?.address ? (session.shipping_details ? 'shipping_details' : 'collected_information') : 'none'
     });
 
     if (!cartItems.length || !shipping?.address) {
@@ -124,6 +126,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Build Printify order
+    const addr = shipping.address;
     const order = {
       external_id: session.id,
       label: `Order from ${customer?.email || 'customer'}`,
@@ -137,14 +140,14 @@ module.exports = async function handler(req, res) {
       address_to: {
         first_name: shipping.name?.split(' ')[0] || 'Customer',
         last_name: shipping.name?.split(' ').slice(1).join(' ') || '',
-        email: customer?.email || '',
-        phone: customer?.phone || '',
-        country: shipping.address.country,
-        region: shipping.address.state || '',
-        address1: shipping.address.line1,
-        address2: shipping.address.line2 || '',
-        city: shipping.address.city,
-        zip: shipping.address.postal_code
+        email: customer?.email || shipping.email || '',
+        phone: customer?.phone || shipping.phone || '',
+        country: addr?.country || 'US',
+        region: addr?.state || '',
+        address1: addr?.line1 || '',
+        address2: addr?.line2 || '',
+        city: addr?.city || '',
+        zip: addr?.postal_code || ''
       }
     };
 
