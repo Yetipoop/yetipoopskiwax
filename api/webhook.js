@@ -101,7 +101,7 @@ module.exports = async function handler(req, res) {
 
     // Build Printful order
     const printfulOrder = {
-      external_id: session.id,
+      external_id: session.id.replace(/_/g, '-'),
       recipient: {
         name: shipping.name || customer?.name || 'Customer',
         email: customer?.email || '',
