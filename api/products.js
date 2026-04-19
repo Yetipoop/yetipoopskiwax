@@ -37,9 +37,12 @@ async function fetchPrintfulThumbnails() {
         if (!detail.ok) return;
         const d = await detail.json();
         const syncVariants = d.result?.sync_variants || [];
+        // Find the mockup preview URL from the first variant's files (type: "preview")
+        const previewFile = syncVariants[0]?.files?.find(f => f.type === 'preview');
+        const previewUrl = previewFile?.preview_url;
         for (const sv of syncVariants) {
           if (sv.variant_id) {
-            variantToThumb[sv.variant_id] = sp.thumbnail_url;
+            variantToThumb[sv.variant_id] = previewUrl || sp.thumbnail_url;
           }
         }
       } catch (_) { /* skip on error */ }
