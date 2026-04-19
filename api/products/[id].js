@@ -1,62 +1,31 @@
 // GET /api/products/[id]
-// Fetches a single product from Printify
+// Returns a single product by our internal ID.
+// Replaces live Printify API call with static products-data.js
 
-const https = require('https');
-
-function printifyGet(path, token) {
-  return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.printify.com',
-      path,
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'YetiPoopSkiWax/1.0'
-      }
-    };
-    const req = https.request(options, res => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(data)); }
-        catch (e) { reject(e); }
-      });
-    });
-    req.on('error', reject);
-    req.end();
-  });
-}
+const products = require('../products-data');
 
 module.exports = async function handler(req, res) {
   const { id } = req.query;
-  const token = process.env.PRINTIFY_API_TOKEN;
-  const shopId = process.env.PRINTIFY_SHOP_ID;
 
-  if (!token || !shopId || shopId === 'TO_BE_FILLED') {
+  const product = products.find(p => p.id === id);
+  if (!product) {
     return res.status(404).json({ error: 'Product not found' });
   }
 
-  try {
-    const product = await printifyGet(`/v1/shops/${shopId}/products/${id}.json`, token);
+  const enabledVariants = product.variants.filter(v => v.is_enabled);
 
-    // Filter to only the variants Mike has enabled in Printify (is_enabled, not enabled)
-    const enabledVariants = (product.variants || []).filter(v => v.is_enabled);
-
-    // Collect option-value IDs present in enabled variants (coerce to String for safe Set lookup)
-    const enabledValueIds = new Set(
-      enabledVariants.flatMap(v => (v.options || []).map(String))
-    );
-
-    // Trim each option's value list to only values that appear in an enabled variant
-    const trimmedOptions = (product.options || []).map(opt => ({
+  // Build trimmed options — only include values that appear in an enabled variant
+  const enabledValueIds = new Set(enabledVariants.flatMap(v => v.options || []));
+  const trimmedOptions = (product.options || [])
+    .map(opt => ({
       ...opt,
-      values: (opt.values || []).filter(val => enabledValueIds.has(String(val.id)))
-    })).filter(opt => opt.values.length > 0);
+      values: opt.values.filter(val => enabledValueIds.has(val.id))
+    }))
+    .filter(opt => opt.values.length > 0);
 
-    return res.status(200).json({ ...product, variants: enabledVariants, options: trimmedOptions });
-  } catch (e) {
-    console.error('Printify product error:', e.message);
-    return res.status(404).json({ error: 'Product not found' });
-  }
+  return res.status(200).json({
+    ...product,
+    variants: enabledVariants,
+    options: trimmedOptions
+  });
 };

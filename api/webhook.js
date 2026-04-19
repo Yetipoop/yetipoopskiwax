@@ -1,77 +1,55 @@
 // POST /api/webhook
 // Handles Stripe checkout.session.completed events
-// Creates the corresponding order in Printify automatically
+// Creates the corresponding order in Printful
+//
+// TESTING MODE: Orders are created as DRAFTS (no ?confirm=true).
+// To go live: change the fetch URL below from '/orders' to '/orders?confirm=true'
 
 const Stripe = require('stripe');
-const https = require('https');
+const products = require('./products-data');
 
 async function getRawBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
-    req.on('data', chunk => {
-      data += chunk.toString();
-    });
-    req.on('end', () => {
-      resolve(data);
-    });
+    req.on('data', chunk => { data += chunk.toString(); });
+    req.on('end', () => { resolve(data); });
     req.on('error', reject);
   });
 }
 
-function printifyPost(path, body, token) {
-  return new Promise((resolve, reject) => {
-    const payload = JSON.stringify(body);
-    const options = {
-      hostname: 'api.printify.com',
-      path,
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
-        'User-Agent': 'YetiPoopSkiWax/1.0'
-      }
-    };
-    const req = https.request(options, res => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
-        catch (e) { resolve({ status: res.statusCode, body: data }); }
-      });
-    });
-    req.on('error', reject);
-    req.write(payload);
-    req.end();
-  });
+// Look up artwork info by Printful variant_id
+function getArtworkForVariant(variantId) {
+  for (const product of products) {
+    const variant = product.variants.find(v => v.id === variantId);
+    if (variant) {
+      return {
+        url: product.artworkUrl,
+        type: product.artworkFileType
+      };
+    }
+  }
+  return null;
 }
 
 module.exports = async function handler(req, res) {
   console.log('[WEBHOOK] Received request:', { method: req.method, url: req.url });
 
   if (req.method !== 'POST') {
-    console.log('[WEBHOOK] Not a POST request, returning 405');
     return res.status(405).end();
   }
 
   const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  const printifyToken = process.env.PRINTIFY_API_TOKEN;
-  const shopId = process.env.PRINTIFY_SHOP_ID;
+  const printfulToken = process.env.PRINTFUL_API_TOKEN;
+  const printfulStoreId = process.env.PRINTFUL_STORE_ID;
 
-  // Get raw body for signature verification
-  // In Vercel with bodyParser: false, req.body might be a Buffer or string
-  // If it's an object, we need to read from the request stream
+  // Read raw body for Stripe signature verification
   let rawBody;
   if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) {
     rawBody = req.body;
-    console.log('[WEBHOOK] Using req.body as raw body, type:', typeof req.body, 'length:', rawBody.length);
   } else {
-    // Body was already parsed — try to read from stream
-    console.log('[WEBHOOK] Body is parsed object, attempting to read raw stream...');
     try {
       rawBody = await getRawBody(req);
-      console.log('[WEBHOOK] Read raw body from stream, length:', rawBody.length);
     } catch (e) {
       console.error('[WEBHOOK] Failed to read raw body:', e.message);
       return res.status(400).json({ error: 'Cannot read request body' });
@@ -79,9 +57,9 @@ module.exports = async function handler(req, res) {
   }
 
   console.log('[WEBHOOK] Config check:', {
-    hasSecret: !!webhookSecret,
-    hasPrintifyToken: !!printifyToken,
-    shopId,
+    hasStripeSecret: !!webhookSecret,
+    hasPrintfulToken: !!printfulToken,
+    printfulStoreId,
     rawBodyLength: rawBody?.length
   });
 
@@ -89,26 +67,21 @@ module.exports = async function handler(req, res) {
   let event;
   try {
     const sig = req.headers['stripe-signature'];
-    console.log('[WEBHOOK] Attempting signature verification...');
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
-    console.log('[WEBHOOK] Signature verified successfully. Event type:', event.type);
+    console.log('[WEBHOOK] Signature verified. Event type:', event.type);
   } catch (e) {
     console.error('[WEBHOOK] Signature error:', e.message);
     return res.status(400).json({ error: 'Invalid signature: ' + e.message });
   }
 
   if (event.type !== 'checkout.session.completed') {
-    console.log('[WEBHOOK] Ignoring event type:', event.type);
     return res.status(200).json({ received: true });
   }
 
-  console.log('[WEBHOOK] Processing checkout.session.completed');
   const session = event.data.object;
 
   try {
-    // Parse cart from session metadata
     const cartItems = JSON.parse(session.metadata?.cart || '[]');
-    // Shipping can be in two places depending on Stripe API response
     const shipping = session.shipping_details || session.collected_information?.shipping_details;
     const customer = session.customer_details;
 
@@ -116,79 +89,74 @@ module.exports = async function handler(req, res) {
       sessionId: session.id,
       cartItemCount: cartItems.length,
       hasShipping: !!shipping?.address,
-      customerEmail: customer?.email,
-      shippingSource: shipping?.address ? (session.shipping_details ? 'shipping_details' : 'collected_information') : 'none'
+      customerEmail: customer?.email
     });
 
     if (!cartItems.length || !shipping?.address) {
-      console.error('[WEBHOOK] Missing cart or shipping info. Cart:', cartItems, 'Shipping:', shipping?.address);
+      console.error('[WEBHOOK] Missing cart or shipping. Cart:', cartItems, 'Shipping:', shipping?.address);
       return res.status(200).json({ received: true });
     }
 
-    // Build Printify order
     const addr = shipping.address;
-    const phone = customer?.phone || shipping.phone || '';
-    const order = {
+
+    // Build Printful order
+    const printfulOrder = {
       external_id: session.id,
-      label: `Order from ${customer?.email || 'customer'}`,
-      line_items: cartItems.map(item => ({
-        product_id: item.productId,
-        variant_id: item.variantId,
-        quantity: item.quantity
-      })),
-      shipping_method: 1,
-      send_shipping_notification: true,
-      address_to: {
-        first_name: shipping.name?.split(' ')[0] || 'Customer',
-        last_name: shipping.name?.split(' ').slice(1).join(' ') || '',
-        email: customer?.email || shipping.email || '',
-        phone: phone || '+1', // Printify requires phone; use placeholder if missing
-        country: addr?.country || 'US',
-        region: addr?.state || '',
-        address1: addr?.line1 || '',
-        address2: addr?.line2 || '',
-        city: addr?.city || '',
-        zip: addr?.postal_code || ''
-      }
+      recipient: {
+        name: shipping.name || customer?.name || 'Customer',
+        email: customer?.email || '',
+        phone: customer?.phone || shipping?.phone || '',
+        address1: addr.line1 || '',
+        address2: addr.line2 || '',
+        city: addr.city || '',
+        state_code: addr.state || '',
+        country_code: addr.country || 'US',
+        zip: addr.postal_code || ''
+      },
+      items: cartItems.map((item, i) => {
+        const variantId = Number(item.variantId);
+        const artwork = getArtworkForVariant(variantId);
+
+        if (!artwork) {
+          console.warn(`[WEBHOOK] No artwork found for variantId ${variantId} — order item ${i} will be missing file`);
+        }
+
+        return {
+          variant_id: variantId,
+          quantity: item.quantity || 1,
+          files: artwork ? [{ type: artwork.type, url: artwork.url }] : []
+        };
+      })
     };
 
-    console.log('[WEBHOOK] Sending order to Printify:', JSON.stringify(order, null, 2));
-    const createResult = await printifyPost(
-      `/v1/shops/${shopId}/orders.json`,
-      order,
-      printifyToken
-    );
+    console.log('[WEBHOOK] Sending order to Printful:', JSON.stringify(printfulOrder, null, 2));
 
-    console.log('[WEBHOOK] Printify create response:', { status: createResult.status, orderId: createResult.body?.id });
+    // TESTING: omit ?confirm=true to create as draft (no production, no charge to Printful account)
+    // GO LIVE:  change '/orders' to '/orders?confirm=true' below
+    const response = await fetch('https://api.printful.com/orders', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${printfulToken}`,
+        'X-PF-Store-Id': printfulStoreId,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(printfulOrder)
+    });
 
-    if (createResult.status >= 400) {
-      console.error('[WEBHOOK] Printify create error:', createResult.status, createResult.body);
-      return res.status(200).json({ received: true, printifyError: createResult.body });
+    const result = await response.json();
+    console.log('[WEBHOOK] Printful response:', { status: response.status, body: JSON.stringify(result) });
+
+    if (!response.ok) {
+      console.error('[WEBHOOK] Printful error:', response.status, result);
+      // Return 200 so Stripe does not retry — log error for manual review
+      return res.status(200).json({ received: true, printfulError: result });
     }
 
-    const printifyOrderId = createResult.body?.id;
-    console.log(`[WEBHOOK] DRAFT order created: ${printifyOrderId}, now confirming...`);
-
-    // CRITICAL: Confirm the order to submit for production and trigger Printify charging
-    const confirmResult = await printifyPost(
-      `/v1/shops/${shopId}/orders/${printifyOrderId}/confirm`,
-      {},
-      printifyToken
-    );
-
-    console.log('[WEBHOOK] Printify confirm response:', { status: confirmResult.status, body: JSON.stringify(confirmResult.body) });
-
-    if (confirmResult.status >= 400) {
-      console.error('[WEBHOOK] Printify confirm error:', confirmResult.status, confirmResult.body);
-      return res.status(200).json({ received: true, orderId: printifyOrderId, confirmError: confirmResult.body });
-    }
-
-    console.log(`[WEBHOOK] Order fully processed: ${printifyOrderId} for session ${session.id}`);
-    return res.status(200).json({ received: true, orderId: printifyOrderId, status: 'confirmed' });
+    console.log(`[WEBHOOK] Order created in Printful: ${result.result?.id} for session ${session.id}`);
+    return res.status(200).json({ received: true, orderId: result.result?.id, status: result.result?.status });
 
   } catch (e) {
-    console.error('[WEBHOOK] Webhook processing error:', e.message, e.stack);
-    // Still return 200 so Stripe doesn't retry
+    console.error('[WEBHOOK] Processing error:', e.message, e.stack);
     return res.status(200).json({ received: true, error: e.message });
   }
 };
