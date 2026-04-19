@@ -131,9 +131,9 @@ module.exports = async function handler(req, res) {
 
     console.log('[WEBHOOK] Sending order to Printful:', JSON.stringify(printfulOrder, null, 2));
 
-    // TESTING: omit ?confirm=true to create as draft (no production, no charge to Printful account)
-    // GO LIVE:  change '/orders' to '/orders?confirm=true' below
-    const response = await fetch('https://api.printful.com/orders', {
+    // LIVE: ?confirm=true submits order to production immediately
+    // TESTING: remove ?confirm=true to create as draft
+    const response = await fetch('https://api.printful.com/orders?confirm=true', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${printfulToken}`,
