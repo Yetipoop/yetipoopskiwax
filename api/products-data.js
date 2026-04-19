@@ -47,7 +47,7 @@ const products = [
     description: 'Yeti Poop Ski Wax moisture-wicking sports tee. Gildan DryBlend 8000.',
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkUrl: `${SITE}/artwork/tee-logo-dark.png`,
-    artworkFileType: 'front',
+    artworkFileType: 'front_dtf',
     options: [
       {
         id: 1,
