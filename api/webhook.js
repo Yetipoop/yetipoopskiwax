@@ -22,9 +22,13 @@ function getArtworkForVariant(variantId) {
   for (const product of products) {
     const variant = product.variants.find(v => v.id === variantId);
     if (variant) {
+      // artworkFiles = multi-file products (e.g. hoodie: front + back)
+      // artworkFileType = legacy single-file products
+      const files = product.artworkFiles
+        ? product.artworkFiles.map(f => ({ type: f.type, url: f.url }))
+        : [{ type: product.artworkFileType, url: product.artworkUrl }];
       return {
-        url: product.artworkUrl,
-        type: product.artworkFileType,
+        files,
         options: product.artworkOptions || []
       };
     }
@@ -125,7 +129,7 @@ module.exports = async function handler(req, res) {
         return {
           variant_id: variantId,
           quantity: item.quantity || 1,
-          files: artwork ? [{ type: artwork.type, url: artwork.url }] : [],
+          files: artwork ? artwork.files : [],
           ...(artwork?.options?.length ? { options: artwork.options } : {})
         };
       })
