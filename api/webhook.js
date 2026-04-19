@@ -24,7 +24,8 @@ function getArtworkForVariant(variantId) {
     if (variant) {
       return {
         url: product.artworkUrl,
-        type: product.artworkFileType
+        type: product.artworkFileType,
+        options: product.artworkOptions || []
       };
     }
   }
@@ -124,7 +125,8 @@ module.exports = async function handler(req, res) {
         return {
           variant_id: variantId,
           quantity: item.quantity || 1,
-          files: artwork ? [{ type: artwork.type, url: artwork.url }] : []
+          files: artwork ? [{ type: artwork.type, url: artwork.url }] : [],
+          ...(artwork?.options?.length ? { options: artwork.options } : {})
         };
       })
     };

@@ -94,21 +94,11 @@ const products = [
     description: 'Yeti Poop Ski Wax dad hat. Otto Cap 18-772, garment-washed cotton twill.',
     images: [{ src: `${SITE}/artwork/hat-logo-dark.png` }],
     artworkUrl: `${SITE}/artwork/hat-logo-dark.png`,
-    artworkFileType: 'embroidery',
+    artworkFileType: 'embroidery_front',
+    artworkOptions: [{ id: 'thread_colors', value: ['#333366'] }],
     options: [],
-    // NOTE: Hat variant colors are unconfirmed — all disabled until verified.
-    // Printful variant IDs 24534–24541 correspond to 8 colors (unknown mapping).
-    // To enable: identify the correct variant ID for the desired color in Printful dashboard,
-    // set is_enabled: true, and add a matching option value if offering multiple colors.
     variants: [
-      { id: 24534, price: 2499, is_enabled: false, title: 'TBD color 1', options: [] },
-      { id: 24535, price: 2499, is_enabled: false, title: 'TBD color 2', options: [] },
-      { id: 24536, price: 2499, is_enabled: false, title: 'TBD color 3', options: [] },
-      { id: 24537, price: 2499, is_enabled: false, title: 'TBD color 4', options: [] },
-      { id: 24538, price: 2499, is_enabled: false, title: 'TBD color 5', options: [] },
-      { id: 24539, price: 2499, is_enabled: false, title: 'TBD color 6', options: [] },
-      { id: 24540, price: 2499, is_enabled: false, title: 'TBD color 7', options: [] },
-      { id: 24541, price: 2499, is_enabled: false, title: 'TBD color 8', options: [] }
+      { id: 24540, price: 2499, is_enabled: true, title: 'Navy / One Size', options: [] }
     ]
   }
 ];
