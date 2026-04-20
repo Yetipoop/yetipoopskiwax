@@ -61,18 +61,26 @@ module.exports = async function handler(req, res) {
     }))
     .filter(opt => opt.values.length > 0);
 
-  // Enrich images with Printful mockup thumbnails (one per variant for color swapping)
-  const variantIds = enabledVariants.map(v => v.id);
-  const { variantImages, firstThumb } = await fetchPrintfulVariantImages(variantIds);
-  const images = firstThumb
-    ? [{ src: firstThumb }, ...product.images]
-    : product.images;
+  // If any color option has static mockups baked in, use those directly —
+  // no Printful API call needed. Otherwise fall back to fetching from Printful.
+  const colorOption = trimmedOptions.find(o => o.type === 'color');
+  const hasStaticMockups = colorOption?.values?.some(v => v.mockup?.front);
+
+  let images = product.images;
+  let variantImages = {};
+
+  if (!hasStaticMockups) {
+    const variantIds = enabledVariants.map(v => v.id);
+    const result = await fetchPrintfulVariantImages(variantIds);
+    if (result.firstThumb) images = [{ src: result.firstThumb }, ...product.images];
+    variantImages = result.variantImages;
+  }
 
   return res.status(200).json({
     ...product,
     variants: enabledVariants,
     options: trimmedOptions,
     images,
-    variantImages   // { [variantId]: previewUrl } — used by frontend for color swapping
+    variantImages
   });
 };

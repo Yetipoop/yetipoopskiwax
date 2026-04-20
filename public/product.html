@@ -171,13 +171,10 @@
 
       // Swap main image when a color option changes
       const opt = (currentProduct.options || [])[optionIndex];
-      if (opt?.type === 'color' && currentProduct.variantImages) {
-        const colorValueId = opt.values.find(v => v.title === value)?.id;
-        if (colorValueId) {
-          const match = currentProduct.variants.find(v => v.options?.includes(colorValueId));
-          const imgUrl = match && currentProduct.variantImages[match.id];
-          if (imgUrl) document.getElementById('main-img').src = imgUrl;
-        }
+      if (opt?.type === 'color') {
+        const colorVal = opt.values.find(v => v.title === value);
+        const imgUrl = colorVal?.mockup?.front;
+        if (imgUrl) document.getElementById('main-img').src = imgUrl;
       }
 
       // Enable add to cart if all options selected

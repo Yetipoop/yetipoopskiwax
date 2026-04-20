@@ -92,7 +92,7 @@ const products = [
     id: 'yeti-hoodie-adult',
     title: 'Yeti Poop Hoodie — Adult',
     description: 'Yeti Poop Ski Wax hoodie. Gildan Heavy Blend 18500, 50/50 cotton-poly. Small logo on front left chest, large logo on back.',
-    images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
+    images: [{ src: `${SITE}/artwork/hoodie-adult-navy-front.jpg` }],
     artworkFiles: [
       { type: 'default', url: `${SITE}/artwork/hoodie-adult-front.png` },
       { type: 'back',    url: `${SITE}/artwork/hoodie-adult-back.png` },
@@ -105,10 +105,10 @@ const products = [
         name: 'Color',
         type: 'color',
         values: [
-          { id: 1, title: 'Navy' },
-          { id: 2, title: 'Indigo Blue' },
-          { id: 3, title: 'Graphite Heather' },
-          { id: 4, title: 'Military Green' },
+          { id: 1, title: 'Navy',             mockup: { front: `${SITE}/artwork/hoodie-adult-navy-front.jpg`,     back: `${SITE}/artwork/hoodie-adult-navy-back.jpg`     } },
+          { id: 2, title: 'Indigo Blue',      mockup: { front: `${SITE}/artwork/hoodie-adult-indigo-front.jpg`,   back: `${SITE}/artwork/hoodie-adult-indigo-back.jpg`   } },
+          { id: 3, title: 'Graphite Heather', mockup: { front: `${SITE}/artwork/hoodie-adult-graphite-front.jpg`, back: `${SITE}/artwork/hoodie-adult-graphite-back.jpg` } },
+          { id: 4, title: 'Military Green',   mockup: { front: `${SITE}/artwork/hoodie-adult-military-front.jpg`, back: `${SITE}/artwork/hoodie-adult-military-back.jpg` } },
         ]
       },
       {
@@ -168,7 +168,7 @@ const products = [
     id: 'yeti-hoodie-youth',
     title: 'Yeti Poop Hoodie — Youth',
     description: 'Yeti Poop Ski Wax hoodie for kids. Gildan Heavy Blend 18500B, 50/50 cotton-poly. Small logo on front left chest, large logo on back.',
-    images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
+    images: [{ src: `${SITE}/artwork/hoodie-youth-navy-front.jpg` }],
     artworkFiles: [
       { type: 'default', url: `${SITE}/artwork/hoodie-youth-front.png` },
       { type: 'back',    url: `${SITE}/artwork/hoodie-youth-back.png` },
@@ -181,8 +181,8 @@ const products = [
         name: 'Color',
         type: 'color',
         values: [
-          { id: 1, title: 'Navy' },
-          { id: 2, title: 'Dark Heather' },
+          { id: 1, title: 'Navy',         mockup: { front: `${SITE}/artwork/hoodie-youth-navy-front.jpg`,        back: `${SITE}/artwork/hoodie-youth-navy-back.jpg`        } },
+          { id: 2, title: 'Dark Heather', mockup: { front: `${SITE}/artwork/hoodie-youth-darkheather-front.jpg`, back: `${SITE}/artwork/hoodie-youth-darkheather-back.jpg` } },
         ]
       },
       {
