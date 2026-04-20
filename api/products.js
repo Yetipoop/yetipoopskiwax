@@ -65,14 +65,27 @@ module.exports = async function handler(req, res) {
     .map(p => ({ ...p, variants: p.variants.filter(v => v.is_enabled) }))
     .filter(p => p.variants.length > 0);
 
-  // Try to fetch Printful thumbnails and merge into product images
-  const variantToThumb = await fetchPrintfulThumbnails();
-  if (variantToThumb) {
-    for (const p of visible) {
-      // Find thumbnail using the first enabled variant's Printful catalog variant_id
-      const thumb = p.variants.map(v => variantToThumb[v.id]).find(Boolean);
-      if (thumb) {
-        p.images = [{ src: thumb }, ...p.images];
+  // For products with static mockups baked into color options, use those directly.
+  // For others, fetch from Printful sync API.
+  const needsPrintful = visible.filter(p => {
+    const colorOpt = (p.options || []).find(o => o.type === 'color');
+    return !colorOpt?.values?.some(v => v.mockup?.front);
+  });
+
+  // Apply static mockups
+  for (const p of visible) {
+    const colorOpt = (p.options || []).find(o => o.type === 'color');
+    const firstMockup = colorOpt?.values?.find(v => v.mockup?.front)?.mockup?.front;
+    if (firstMockup) p.images = [{ src: firstMockup }];
+  }
+
+  // Fetch Printful thumbnails only for products without static mockups
+  if (needsPrintful.length > 0) {
+    const variantToThumb = await fetchPrintfulThumbnails();
+    if (variantToThumb) {
+      for (const p of needsPrintful) {
+        const thumb = p.variants.map(v => variantToThumb[v.id]).find(Boolean);
+        if (thumb) p.images = [{ src: thumb }, ...p.images];
       }
     }
   }
