@@ -94,8 +94,8 @@ const products = [
     description: 'Yeti Poop Ski Wax hoodie. Gildan Heavy Blend 18500, 50/50 cotton-poly. Small logo on front left chest, large logo on back.',
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkFiles: [
-      { type: 'front', url: `${SITE}/artwork/tee-logo-dark.png` },
-      { type: 'back',  url: `${SITE}/artwork/tee-logo-dark.png` },
+      { type: 'default', url: `${SITE}/artwork/hoodie-adult-front.png` },
+      { type: 'back',    url: `${SITE}/artwork/hoodie-adult-back.png` },
     ],
     // Color value IDs: Navy=1, Indigo Blue=2, Graphite Heather=3, Military Green=4
     // Size value IDs:  S=5, M=6, L=7, XL=8, 2XL=9, 3XL=10, 4XL=11, 5XL=12
@@ -170,8 +170,8 @@ const products = [
     description: 'Yeti Poop Ski Wax hoodie for kids. Gildan Heavy Blend 18500B, 50/50 cotton-poly. Small logo on front left chest, large logo on back.',
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkFiles: [
-      { type: 'front', url: `${SITE}/artwork/tee-logo-dark.png` },
-      { type: 'back',  url: `${SITE}/artwork/tee-logo-dark.png` },
+      { type: 'default', url: `${SITE}/artwork/hoodie-youth-front.png` },
+      { type: 'back',    url: `${SITE}/artwork/hoodie-youth-back.png` },
     ],
     // Color value IDs: Navy=1, Dark Heather=2
     // Size value IDs:  XS=3, S=4, M=5, L=6, XL=7
