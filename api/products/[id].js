@@ -69,7 +69,11 @@ module.exports = async function handler(req, res) {
   let images = product.images;
   let variantImages = {};
 
-  if (!hasStaticMockups) {
+  if (hasStaticMockups) {
+    const firstColor = colorOption.values[0];
+    images = [{ src: firstColor.mockup.front, view: 'front' }];
+    if (firstColor.mockup.back) images.push({ src: firstColor.mockup.back, view: 'back' });
+  } else {
     const variantIds = enabledVariants.map(v => v.id);
     const result = await fetchPrintfulVariantImages(variantIds);
     if (result.firstThumb) images = [{ src: result.firstThumb }, ...product.images];

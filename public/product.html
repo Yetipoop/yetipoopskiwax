@@ -117,7 +117,8 @@
       // Thumbnails
       const thumbHtml = (p.images || []).slice(0, 5).map((img, i) => `
         <img src="${img.src}" class="product-thumb ${i === 0 ? 'active' : ''}"
-          onclick="changeMainImg('${img.src}', this)" alt="View ${i+1}" loading="lazy">
+          ${img.view ? `data-view="${img.view}"` : ''}
+          onclick="changeMainImg(this.src, this)" alt="View ${i+1}" loading="lazy">
       `).join('');
 
       document.getElementById('product-detail').innerHTML = `
@@ -169,12 +170,17 @@
       document.querySelectorAll(`[data-option="${optionIndex}"]`).forEach(b => b.classList.remove('selected'));
       el.classList.add('selected');
 
-      // Swap main image when a color option changes
+      // Swap main image and thumbnails when a color option changes
       const opt = (currentProduct.options || [])[optionIndex];
       if (opt?.type === 'color') {
         const colorVal = opt.values.find(v => v.title === value);
-        const imgUrl = colorVal?.mockup?.front;
-        if (imgUrl) document.getElementById('main-img').src = imgUrl;
+        if (colorVal?.mockup?.front) {
+          document.getElementById('main-img').src = colorVal.mockup.front;
+          // Update color-keyed thumbnails
+          document.querySelectorAll('.product-thumb[data-view="front"]').forEach(t => t.src = colorVal.mockup.front);
+          if (colorVal.mockup.back)
+            document.querySelectorAll('.product-thumb[data-view="back"]').forEach(t => t.src = colorVal.mockup.back);
+        }
       }
 
       // Enable add to cart if all options selected
