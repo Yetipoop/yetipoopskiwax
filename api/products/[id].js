@@ -4,33 +4,42 @@
 
 const products = require('../products-data');
 
-async function fetchPrintfulThumbForVariants(variantIds) {
+// Returns { [catalogVariantId]: previewUrl } for all matched variants.
+// Also returns firstThumb (the first preview found) for the main images array.
+async function fetchPrintfulVariantImages(variantIds) {
   const token = process.env.PRINTFUL_API_TOKEN;
   const storeId = process.env.PRINTFUL_STORE_ID;
-  if (!token || !storeId || !variantIds.length) return null;
+  if (!token || !storeId || !variantIds.length) return { variantImages: {}, firstThumb: null };
+
+  const variantIdSet = new Set(variantIds);
+  const variantImages = {};
 
   try {
     const res = await fetch('https://api.printful.com/sync/products?limit=100', {
       headers: { 'Authorization': `Bearer ${token}`, 'X-PF-Store-Id': storeId }
     });
-    if (!res.ok) return null;
+    if (!res.ok) return { variantImages: {}, firstThumb: null };
     const data = await res.json();
 
-    for (const sp of (data.result || [])) {
-      const detail = await fetch(`https://api.printful.com/sync/products/${sp.id}`, {
-        headers: { 'Authorization': `Bearer ${token}`, 'X-PF-Store-Id': storeId }
-      });
-      if (!detail.ok) continue;
-      const d = await detail.json();
-      const syncVariants = d.result?.sync_variants || [];
-      const match = syncVariants.find(sv => variantIds.includes(sv.variant_id));
-      if (match) {
-        const previewFile = match.files?.find(f => f.type === 'preview');
-        return previewFile?.preview_url || sp.thumbnail_url || null;
-      }
-    }
+    await Promise.all((data.result || []).map(async (sp) => {
+      try {
+        const detail = await fetch(`https://api.printful.com/sync/products/${sp.id}`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'X-PF-Store-Id': storeId }
+        });
+        if (!detail.ok) return;
+        const d = await detail.json();
+        for (const sv of (d.result?.sync_variants || [])) {
+          if (!variantIdSet.has(sv.variant_id)) continue;
+          const previewFile = sv.files?.find(f => f.type === 'preview');
+          const url = previewFile?.preview_url || sp.thumbnail_url;
+          if (url) variantImages[sv.variant_id] = url;
+        }
+      } catch (_) { /* skip */ }
+    }));
   } catch (_) { /* fall through */ }
-  return null;
+
+  const firstThumb = Object.values(variantImages)[0] || null;
+  return { variantImages, firstThumb };
 }
 
 module.exports = async function handler(req, res) {
@@ -52,17 +61,18 @@ module.exports = async function handler(req, res) {
     }))
     .filter(opt => opt.values.length > 0);
 
-  // Enrich images with Printful mockup thumbnail
+  // Enrich images with Printful mockup thumbnails (one per variant for color swapping)
   const variantIds = enabledVariants.map(v => v.id);
-  const thumb = await fetchPrintfulThumbForVariants(variantIds);
-  const images = thumb
-    ? [{ src: thumb }, ...product.images]
+  const { variantImages, firstThumb } = await fetchPrintfulVariantImages(variantIds);
+  const images = firstThumb
+    ? [{ src: firstThumb }, ...product.images]
     : product.images;
 
   return res.status(200).json({
     ...product,
     variants: enabledVariants,
     options: trimmedOptions,
-    images
+    images,
+    variantImages   // { [variantId]: previewUrl } — used by frontend for color swapping
   });
 };

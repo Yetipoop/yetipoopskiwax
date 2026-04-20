@@ -168,6 +168,18 @@
       // Update button states for this option group
       document.querySelectorAll(`[data-option="${optionIndex}"]`).forEach(b => b.classList.remove('selected'));
       el.classList.add('selected');
+
+      // Swap main image when a color option changes
+      const opt = (currentProduct.options || [])[optionIndex];
+      if (opt?.type === 'color' && currentProduct.variantImages) {
+        const colorValueId = opt.values.find(v => v.title === value)?.id;
+        if (colorValueId) {
+          const match = currentProduct.variants.find(v => v.options?.includes(colorValueId));
+          const imgUrl = match && currentProduct.variantImages[match.id];
+          if (imgUrl) document.getElementById('main-img').src = imgUrl;
+        }
+      }
+
       // Enable add to cart if all options selected
       const totalOptions = (currentProduct.options || []).length;
       const atcBtn = document.getElementById('atc-btn');
