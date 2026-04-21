@@ -1,12 +1,54 @@
 // POST /api/webhook
 // Handles Stripe checkout.session.completed events
-// Creates the corresponding order in Printful
-//
-// TESTING MODE: Orders are created as DRAFTS (no ?confirm=true).
-// To go live: change the fetch URL below from '/orders' to '/orders?confirm=true'
+// Creates the corresponding order in Printful and emails the customer
 
 const Stripe = require('stripe');
+const nodemailer = require('nodemailer');
 const products = require('./products-data');
+
+function getProductInfo(productId, variantId) {
+  const product = products.find(p => p.id === productId);
+  if (!product) return { title: 'Item', variantTitle: '' };
+  const variant = product.variants.find(v => v.id === Number(variantId));
+  return {
+    title: product.title,
+    variantTitle: variant?.title || ''
+  };
+}
+
+async function sendOrderConfirmationEmail({ to, name, cartItems, amountTotal, gmailUser, gmailPass }) {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: gmailUser, pass: gmailPass }
+  });
+
+  const itemRows = cartItems.map(item => {
+    const info = getProductInfo(item.productId, item.variantId);
+    return `<tr>
+      <td style="padding:8px 0;color:#fffce3;">${info.title}${info.variantTitle ? ' — ' + info.variantTitle : ''}</td>
+      <td style="padding:8px 0;color:#fffce3;text-align:right;">x${item.quantity || 1}</td>
+    </tr>`;
+  }).join('');
+
+  const total = (amountTotal / 100).toFixed(2);
+
+  const html = `
+    <div style="background:#3c5a74;padding:40px;font-family:sans-serif;max-width:560px;">
+      <p style="color:#F7813E;font-size:22px;margin:0 0 24px;">Order confirmed.</p>
+      <p style="color:#fffce3;margin:0 0 24px;">Hey ${name}, your order is in. Here's what's coming:</p>
+      <table style="width:100%;border-top:1px solid #fffce355;margin-bottom:16px;">${itemRows}</table>
+      <p style="color:#fffce3;border-top:1px solid #fffce355;padding-top:16px;margin:0 0 24px;">Total: $${total}</p>
+      <p style="color:#fffce3;margin:0 0 24px;">Estimated delivery: 5–10 business days. You'll get a tracking number when it ships.</p>
+      <p style="color:#F7813E;margin:0;">— Yeti Poop Ski Wax</p>
+    </div>`;
+
+  await transporter.sendMail({
+    from: `"Yeti Poop Ski Wax" <${gmailUser}>`,
+    to,
+    subject: 'Your Yeti Poop order is confirmed',
+    html
+  });
+}
 
 async function getRawBody(req) {
   return new Promise((resolve, reject) => {
@@ -159,6 +201,24 @@ module.exports = async function handler(req, res) {
     }
 
     console.log(`[WEBHOOK] Order created in Printful: ${result.result?.id} for session ${session.id}`);
+
+    // Send order confirmation email to customer (non-blocking)
+    const customerEmail = customer?.email;
+    if (customerEmail && process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+      sendOrderConfirmationEmail({
+        to: customerEmail,
+        name: shipping.name || customer?.name || 'there',
+        cartItems,
+        amountTotal: session.amount_total || 0,
+        gmailUser: process.env.GMAIL_USER,
+        gmailPass: process.env.GMAIL_APP_PASSWORD
+      }).then(() => {
+        console.log(`[WEBHOOK] Confirmation email sent to ${customerEmail}`);
+      }).catch(err => {
+        console.error('[WEBHOOK] Confirmation email failed:', err.message);
+      });
+    }
+
     return res.status(200).json({ received: true, orderId: result.result?.id, status: result.result?.status });
 
   } catch (e) {
