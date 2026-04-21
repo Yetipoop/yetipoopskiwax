@@ -243,10 +243,9 @@ const products = [
     id: 'yeti-hat',
     title: 'Garment-Washed Baseball Cap',
     description: 'Yeti Poop Ski Wax dad hat. Otto Cap 18-772, garment-washed cotton twill.',
-    images: [{ src: `${SITE}/artwork/hat-logo-dark.png` }],
+    images: [{ src: `${SITE}/artwork/hat-mockup-navy.jpg` }],
     artworkUrl: `${SITE}/artwork/hat-logo-dark.png`,
-    artworkFileType: 'embroidery_front',
-    artworkOptions: [{ id: 'thread_colors', value: ['#333366'] }],
+    artworkFileType: 'front_dtf_hat',
     options: [],
     variants: [
       { id: 24540, price: 2499, is_enabled: true, title: 'Navy / One Size', options: [] }
