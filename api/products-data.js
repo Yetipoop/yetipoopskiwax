@@ -214,6 +214,30 @@ const products = [
     ]
   },
   {
+    id: 'yeti-bumper-bluepoo',
+    title: 'Blue Poo Bumper Sticker',
+    description: 'Yeti Poop Ski Wax kiss-cut vinyl bumper sticker. 15″ × 3.75″. Waterproof, durable.',
+    images: [{ src: `${SITE}/artwork/sticker-bumper-bluepoo.png` }],
+    artworkUrl: `${SITE}/artwork/sticker-bumper-bluepoo.png`,
+    artworkFileType: 'default',
+    options: [],
+    variants: [
+      { id: 16362, price: 699, is_enabled: true, title: '15″ × 3.75″', options: [] }
+    ]
+  },
+  {
+    id: 'yeti-bumper-steeze',
+    title: 'Steeze Bumper Sticker',
+    description: 'Yeti Poop Ski Wax kiss-cut vinyl bumper sticker. 15″ × 3.75″. Waterproof, durable.',
+    images: [{ src: `${SITE}/artwork/sticker-bumper-steeze.png` }],
+    artworkUrl: `${SITE}/artwork/sticker-bumper-steeze.png`,
+    artworkFileType: 'default',
+    options: [],
+    variants: [
+      { id: 16362, price: 699, is_enabled: true, title: '15″ × 3.75″', options: [] }
+    ]
+  },
+  {
     id: 'yeti-hat',
     title: 'Garment-Washed Baseball Cap',
     description: 'Yeti Poop Ski Wax dad hat. Otto Cap 18-772, garment-washed cotton twill.',
