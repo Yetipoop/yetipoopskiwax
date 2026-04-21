@@ -76,7 +76,7 @@ module.exports = async function handler(req, res) {
   } else {
     const variantIds = enabledVariants.map(v => v.id);
     const result = await fetchPrintfulVariantImages(variantIds);
-    if (result.firstThumb) images = [{ src: result.firstThumb }, ...product.images];
+    if (result.firstThumb) images = [{ src: result.firstThumb }];
     variantImages = result.variantImages;
   }
 
