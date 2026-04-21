@@ -220,6 +220,7 @@ const products = [
     images: [{ src: `${SITE}/artwork/sticker-bumper-bluepoo.png` }],
     artworkUrl: `${SITE}/artwork/sticker-bumper-bluepoo.png`,
     artworkFileType: 'default',
+    imageContain: true,
     options: [],
     variants: [
       { id: 16362, price: 699, is_enabled: true, title: '15″ × 3.75″', options: [] }
@@ -232,6 +233,7 @@ const products = [
     images: [{ src: `${SITE}/artwork/sticker-bumper-steeze.png` }],
     artworkUrl: `${SITE}/artwork/sticker-bumper-steeze.png`,
     artworkFileType: 'default',
+    imageContain: true,
     options: [],
     variants: [
       { id: 16362, price: 699, is_enabled: true, title: '15″ × 3.75″', options: [] }

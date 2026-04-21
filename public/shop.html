@@ -78,7 +78,7 @@
           const img = p.images?.[0]?.src || '/images/logo-dark.png';
           return `
             <a class="product-card" href="/product.html?id=${p.id}">
-              <div class="product-card-img">
+              <div class="product-card-img${p.imageContain ? ' product-card-img--contain' : ''}">
                 <img src="${img}" alt="${p.title}" loading="lazy">
               </div>
               <div class="product-card-body">

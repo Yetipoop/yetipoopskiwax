@@ -124,7 +124,7 @@
       document.getElementById('product-detail').innerHTML = `
         <div class="product-detail">
           <div class="product-images">
-            <div class="product-main-img">
+            <div class="product-main-img${p.imageContain ? ' product-main-img--contain' : ''}">
               <img id="main-img" src="${mainImg}" alt="${p.title}">
             </div>
             <div class="product-thumbnails">${thumbHtml}</div>
