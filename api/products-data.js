@@ -11,8 +11,8 @@ const SITE = 'https://yetipoopskiwax.com';
 const products = [
   {
     id: 'yeti-youth-tee',
-    title: 'Youth Classic Tee',
-    description: 'Classic Yeti Poop Ski Wax tee for kids. Gildan 5000B, 100% heavy cotton.',
+    title: 'Grom tee',
+    description: 'Groms stuck in the glue? Slap on some slick blue poo. 100% heavy cotton tee keeps comfy and steezy too!',
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkUrl: `${SITE}/artwork/tee-logo-dark.png`,
     artworkFileType: 'front',
@@ -43,8 +43,8 @@ const products = [
   },
   {
     id: 'yeti-sports-tee',
-    title: 'Unisex Sports Tee',
-    description: 'Yeti Poop Ski Wax moisture-wicking sports tee. Gildan DryBlend 8000.',
+    title: 'Adult tee',
+    description: 'Dryblend moisture-wicking tees, so grownups can double their steeze!',
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkUrl: `${SITE}/artwork/tee-logo-dark.png`,
     artworkFileType: 'front_dtf',
@@ -78,8 +78,8 @@ const products = [
   },
   {
     id: 'yeti-helmet-sticker',
-    title: 'Helmet Sticker',
-    description: 'Yeti Poop Ski Wax kiss-cut vinyl sticker. 3″ × 3″. Waterproof, durable.',
+    title: 'Helmet sticker',
+    description: 'Slap this waterproof 3x3 kiss cut sticker on your dome, and flaunt your blue poo steeze wherever you roam!',
     images: [{ src: `${SITE}/artwork/sticker-helmet.png` }],
     artworkUrl: `${SITE}/artwork/sticker-helmet.png`,
     artworkFileType: 'default',
@@ -90,8 +90,8 @@ const products = [
   },
   {
     id: 'yeti-hoodie-adult',
-    title: 'Yeti Poop Hoodie — Adult',
-    description: 'Yeti Poop Ski Wax hoodie. Gildan Heavy Blend 18500, 50/50 cotton-poly. Small logo on front left chest, large logo on back.',
+    title: 'Adult hoodie',
+    description: 'Pull this 50/50 poly/cotton blend hoodie from your pack. Show your blue poo steeze front and back!',
     images: [{ src: `${SITE}/artwork/hoodie-adult-navy-front.jpg` }],
     artworkFiles: [
       { type: 'default', url: `${SITE}/artwork/hoodie-adult-front.png` },
@@ -166,8 +166,8 @@ const products = [
   },
   {
     id: 'yeti-hoodie-youth',
-    title: 'Yeti Poop Hoodie — Youth',
-    description: 'Yeti Poop Ski Wax hoodie for kids. Gildan Heavy Blend 18500B, 50/50 cotton-poly. Small logo on front left chest, large logo on back.',
+    title: 'Grom hoodie',
+    description: 'We think you should…buy your kids this hood(ie). 50/50 poly/cotton blend. Comfort and blue poo steeze for days.',
     images: [{ src: `${SITE}/artwork/hoodie-youth-navy-front.jpg` }],
     artworkFiles: [
       { type: 'default', url: `${SITE}/artwork/hoodie-youth-front.png` },
@@ -215,8 +215,8 @@ const products = [
   },
   {
     id: 'yeti-bumper-bluepoo',
-    title: 'Blue Poo Bumper Sticker',
-    description: 'Yeti Poop Ski Wax kiss-cut vinyl bumper sticker. 15″ × 3.75″. Waterproof, durable.',
+    title: 'Blue poo bumper sticker',
+    description: 'For your car, your favorite bar, or your topsheets. Show that blue poo pride!',
     images: [{ src: `${SITE}/artwork/sticker-bumper-bluepoo.png` }],
     artworkUrl: `${SITE}/artwork/sticker-bumper-bluepoo.png`,
     artworkFileType: 'default',
@@ -228,8 +228,8 @@ const products = [
   },
   {
     id: 'yeti-bumper-steeze',
-    title: 'Steeze Bumper Sticker',
-    description: 'Yeti Poop Ski Wax kiss-cut vinyl bumper sticker. 15″ × 3.75″. Waterproof, durable.',
+    title: 'Steeze bumper sticker',
+    description: 'For your car, your favorite bar, or your topsheets. Show your steeze!',
     images: [{ src: `${SITE}/artwork/sticker-bumper-steeze.png` }],
     artworkUrl: `${SITE}/artwork/sticker-bumper-steeze.png`,
     artworkFileType: 'default',
@@ -241,8 +241,8 @@ const products = [
   },
   {
     id: 'yeti-hat',
-    title: 'Garment-Washed Baseball Cap',
-    description: 'Yeti Poop Ski Wax dad hat. Otto Cap 18-772, garment-washed cotton twill.',
+    title: 'Dad hat',
+    description: 'Do you want to be the only dad not flaunting his superior taste in scatalogical ski wax after Father\'s Day? We didn\'t think so.',
     images: [{ src: `${SITE}/artwork/hat-mockup-navy.jpg` }],
     artworkUrl: `${SITE}/artwork/hat-logo-dark.png`,
     artworkFileType: 'front_dtf_hat',
