@@ -23,9 +23,11 @@ module.exports = async function handler(req, res) {
   const authError = checkAdminAuth(req);
   if (authError) return res.status(401).json({ error: authError });
 
-  // Vercel populates req.query.path as an array of path segments
-  const pathSegments = req.query.path || [];
-  const route = pathSegments[0]; // 'setup-db' | 'codes' | 'affiliates' | 'ledger'
+  // Parse route from URL directly (more reliable than req.query.path with rewrites)
+  const urlPath = (req.url || '').split('?')[0];
+  const parts = urlPath.split('/').filter(Boolean);
+  // URL is /api/admin/<route>, so route is parts[2]
+  const route = parts[2] || parts[parts.length - 1];
 
   const sql = getDb();
 
