@@ -71,6 +71,9 @@ module.exports = async function handler(req, res) {
     let discountAmountCents = 0;
     let isFreeShipping = false;
 
+    // Stripe coupon ID to attach (created dynamically below if code is valid)
+    let stripeCouponId = null;
+
     if (discountCode) {
       try {
         const sql = getDb();
@@ -79,21 +82,27 @@ module.exports = async function handler(req, res) {
           discountAmountCents = calcDiscountCents(appliedCode, cartTotalCents);
           isFreeShipping = appliedCode.type === 'free_shipping';
 
-          // Add negative line item for percentage/fixed discounts
+          // Create a one-time Stripe Coupon for this session
+          // (Stripe Checkout doesn't support negative line items)
           if (discountAmountCents > 0) {
-            lineItems.push({
-              price_data: {
-                currency: 'usd',
-                product_data: { name: `Discount (${appliedCode.code})` },
-                unit_amount: -discountAmountCents
-              },
-              quantity: 1
-            });
+            const couponParams = {
+              duration: 'once',
+              max_redemptions: 1,
+              name: `${appliedCode.code}`
+            };
+            if (appliedCode.type === 'percentage') {
+              couponParams.percent_off = Number(appliedCode.value);
+            } else {
+              couponParams.amount_off = discountAmountCents;
+              couponParams.currency = 'usd';
+            }
+            const coupon = await stripe.coupons.create(couponParams);
+            stripeCouponId = coupon.id;
           }
         }
       } catch (e) {
-        // DB error on discount lookup — proceed without discount rather than blocking checkout
-        console.error('[checkout] Discount validation error:', e.message);
+        // DB or Stripe error — proceed without discount rather than blocking checkout
+        console.error('[checkout] Discount error:', e.message);
       }
     }
 
@@ -130,6 +139,7 @@ module.exports = async function handler(req, res) {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
+      ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
       shipping_address_collection: {
         allowed_countries: ['US', 'CA', 'GB', 'AU', 'NZ', 'DE', 'FR', 'NL', 'SE', 'NO', 'CH']
       },
