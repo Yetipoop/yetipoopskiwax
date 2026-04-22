@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yeti Poop Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #3c5a74;
+      color: #fffce3;
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400&display=swap');
+
+    h1 { color: #F7813E; font-size: 22px; margin-bottom: 32px; }
+    h2 { color: #F7813E; font-size: 16px; margin-bottom: 16px; }
+
+    #login-screen {
+      max-width: 340px;
+      margin: 80px auto;
+    }
+    #login-screen input {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255,252,227,0.1);
+      border: 1px solid rgba(255,252,227,0.3);
+      border-radius: 4px;
+      color: #fffce3;
+      font-family: inherit;
+      font-size: 15px;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 9px 20px;
+      background: #F7813E;
+      color: #3c5a74;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-sm {
+      padding: 5px 12px;
+      font-size: 13px;
+    }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(255,252,227,0.4);
+      color: #fffce3;
+    }
+    .btn-ghost:hover { background: rgba(255,252,227,0.08); }
+    .btn-danger {
+      background: transparent;
+      border: 1px solid rgba(247,129,62,0.5);
+      color: #F7813E;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    nav button {
+      padding: 8px 18px;
+      background: rgba(255,252,227,0.08);
+      border: 1px solid rgba(255,252,227,0.2);
+      border-radius: 4px;
+      color: #fffce3;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    nav button.active {
+      background: #F7813E;
+      color: #3c5a74;
+      border-color: #F7813E;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 8px 10px; color: #F7813E; border-bottom: 1px solid rgba(255,252,227,0.2); font-weight: 400; }
+    td { padding: 9px 10px; border-bottom: 1px solid rgba(255,252,227,0.1); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .badge-green { background: rgba(100,200,100,0.2); color: #8dce8d; }
+    .badge-red   { background: rgba(200,80,80,0.2);  color: #e08080; }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      align-items: flex-end;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 12px; color: rgba(255,252,227,0.6); }
+    .form-group input, .form-group select {
+      padding: 8px 10px;
+      background: rgba(255,252,227,0.1);
+      border: 1px solid rgba(255,252,227,0.25);
+      border-radius: 4px;
+      color: #fffce3;
+      font-family: inherit;
+      font-size: 14px;
+      min-width: 130px;
+    }
+    .form-group input::placeholder { color: rgba(255,252,227,0.35); }
+
+    .card {
+      background: rgba(255,252,227,0.05);
+      border: 1px solid rgba(255,252,227,0.12);
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .stat { display: inline-block; margin-right: 28px; }
+    .stat-label { font-size: 12px; color: rgba(255,252,227,0.5); }
+    .stat-value { font-size: 20px; color: #F7813E; }
+
+    .error-msg { color: #e08080; font-size: 13px; margin-top: 8px; }
+    .success-msg { color: #8dce8d; font-size: 13px; margin-top: 8px; }
+
+    #main-content { display: none; }
+  </style>
+</head>
+<body>
+
+<div id="login-screen">
+  <h1>Yeti Poop Admin</h1>
+  <input type="password" id="password-input" placeholder="Password" autocomplete="current-password">
+  <br>
+  <button class="btn" onclick="login()">Enter</button>
+  <div id="login-error" class="error-msg" style="display:none">Wrong password.</div>
+</div>
+
+<div id="main-content">
+  <h1>Yeti Poop Admin</h1>
+
+  <nav>
+    <button class="active" onclick="showSection('codes')">Discount Codes</button>
+    <button onclick="showSection('affiliates')">Affiliates</button>
+    <button onclick="showSection('ledger')">Ledger</button>
+  </nav>
+
+  <!-- DISCOUNT CODES -->
+  <div id="section-codes" class="section active">
+    <div class="card">
+      <h2>Create Code</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Code</label>
+          <input id="new-code" placeholder="e.g. YETI20" style="text-transform:uppercase">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="new-type" onchange="updateValueLabel()">
+            <option value="percentage">Percentage %</option>
+            <option value="fixed">Fixed $</option>
+            <option value="free_shipping">Free Shipping</option>
+          </select>
+        </div>
+        <div class="form-group" id="value-group">
+          <label id="value-label">Value (%)</label>
+          <input id="new-value" type="number" placeholder="e.g. 20" min="0">
+        </div>
+        <div class="form-group">
+          <label>Affiliate (optional)</label>
+          <select id="new-affiliate">
+            <option value="">None</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Min Order ($)</label>
+          <input id="new-min-order" type="number" placeholder="Optional" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Max Uses</label>
+          <input id="new-max-uses" type="number" placeholder="Unlimited" min="1">
+        </div>
+        <div class="form-group">
+          <label>Expires</label>
+          <input id="new-expires" type="date">
+        </div>
+        <div class="form-group" style="justify-content:flex-end">
+          <button class="btn" onclick="createCode()">Create</button>
+        </div>
+      </div>
+      <div id="create-code-msg"></div>
+    </div>
+
+    <div id="codes-table-wrap">Loading...</div>
+  </div>
+
+  <!-- AFFILIATES -->
+  <div id="section-affiliates" class="section">
+    <div class="card">
+      <h2>Add Affiliate</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Name</label>
+          <input id="aff-name" placeholder="e.g. Kid #1">
+        </div>
+        <div class="form-group">
+          <label>Email (optional)</label>
+          <input id="aff-email" type="email" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label>Commission Rate</label>
+          <input id="aff-rate" type="number" placeholder="e.g. 0.10" min="0" max="1" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input id="aff-notes" placeholder="Optional">
+        </div>
+        <div class="form-group" style="justify-content:flex-end">
+          <button class="btn" onclick="createAffiliate()">Add</button>
+        </div>
+      </div>
+      <div id="create-aff-msg"></div>
+    </div>
+
+    <div id="affiliates-table-wrap">Loading...</div>
+  </div>
+
+  <!-- LEDGER -->
+  <div id="section-ledger" class="section">
+    <div class="form-row" style="margin-bottom:20px;align-items:center">
+      <div class="form-group">
+        <label>Filter by Affiliate</label>
+        <select id="ledger-affiliate-filter" onchange="loadLedger()">
+          <option value="">All Affiliates</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="ledger-summary"></div>
+
+    <div class="card" style="margin-top:20px">
+      <h2>Record Payment</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Affiliate</label>
+          <select id="pay-affiliate"></select>
+        </div>
+        <div class="form-group">
+          <label>Amount ($)</label>
+          <input id="pay-amount" type="number" placeholder="e.g. 12.50" min="0.01" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Note</label>
+          <input id="pay-note" placeholder='e.g. "cash to dad"'>
+        </div>
+        <div class="form-group" style="justify-content:flex-end">
+          <button class="btn" onclick="recordPayment()">Record Payment</button>
+        </div>
+      </div>
+      <div id="payment-msg"></div>
+    </div>
+
+    <h2 style="margin-bottom:12px">Commission History</h2>
+    <div id="ledger-table-wrap">Loading...</div>
+
+    <h2 style="margin:24px 0 12px">Payments Made</h2>
+    <div id="payments-table-wrap">Loading...</div>
+  </div>
+</div>
+
+<script>
+  let pw = '';
+  const API = '';
+
+  function login() {
+    pw = document.getElementById('password-input').value;
+    fetch(`${API}/api/admin/codes`, { headers: { Authorization: `Bearer ${pw}` } })
+      .then(r => {
+        if (r.status === 401) {
+          document.getElementById('login-error').style.display = 'block';
+          pw = '';
+        } else {
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('main-content').style.display = 'block';
+          init();
+        }
+      })
+      .catch(() => {
+        document.getElementById('login-error').style.display = 'block';
+      });
+  }
+
+  document.getElementById('password-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  function showSection(name) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(`section-${name}`).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function authHeaders() {
+    return { 'Content-Type': 'application/json', Authorization: `Bearer ${pw}` };
+  }
+
+  async function apiFetch(path, opts = {}) {
+    const res = await fetch(`${API}${path}`, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } });
+    return res.json();
+  }
+
+  function fmt$(cents) {
+    return '$' + (cents / 100).toFixed(2);
+  }
+
+  function updateValueLabel() {
+    const type = document.getElementById('new-type').value;
+    const label = document.getElementById('value-label');
+    const group = document.getElementById('value-group');
+    if (type === 'free_shipping') {
+      group.style.display = 'none';
+    } else {
+      group.style.display = '';
+      label.textContent = type === 'percentage' ? 'Value (%)' : 'Value ($)';
+    }
+  }
+
+  // ── CODES ──────────────────────────────────────────
+
+  async function loadCodes() {
+    const data = await apiFetch('/api/admin/codes');
+    const wrap = document.getElementById('codes-table-wrap');
+    if (!data.codes?.length) { wrap.innerHTML = '<p style="opacity:.5;font-size:14px">No codes yet.</p>'; return; }
+
+    wrap.innerHTML = `<table>
+      <thead><tr>
+        <th>Code</th><th>Type</th><th>Value</th><th>Affiliate</th>
+        <th>Uses</th><th>Expires</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody>${data.codes.map(c => `
+        <tr>
+          <td><strong>${c.code}</strong></td>
+          <td>${c.type}</td>
+          <td>${c.type === 'percentage' ? c.value + '%' : c.type === 'fixed' ? fmt$(c.value * 100) : '—'}</td>
+          <td>${c.affiliate_name || '—'}</td>
+          <td>${c.uses_count}${c.max_uses ? ' / ' + c.max_uses : ''}</td>
+          <td>${c.expires_at ? new Date(c.expires_at).toLocaleDateString() : '—'}</td>
+          <td><span class="badge ${c.is_active ? 'badge-green' : 'badge-red'}">${c.is_active ? 'Active' : 'Inactive'}</span></td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-sm btn-ghost" onclick="toggleCode(${c.id}, ${c.is_active})">${c.is_active ? 'Disable' : 'Enable'}</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteCode(${c.id}, '${c.code}')" style="margin-left:4px">Delete</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }
+
+  async function createCode() {
+    const type = document.getElementById('new-type').value;
+    const value = parseFloat(document.getElementById('new-value').value) || 0;
+    const code = document.getElementById('new-code').value.trim().toUpperCase();
+    const affiliateId = document.getElementById('new-affiliate').value || null;
+    const minOrderRaw = document.getElementById('new-min-order').value;
+    const maxUsesRaw = document.getElementById('new-max-uses').value;
+    const expiresRaw = document.getElementById('new-expires').value;
+    const msgEl = document.getElementById('create-code-msg');
+
+    if (!code) { msgEl.innerHTML = '<span class="error-msg">Code is required.</span>'; return; }
+
+    const body = {
+      code, type, value,
+      affiliate_id: affiliateId ? parseInt(affiliateId) : null,
+      min_order_cents: minOrderRaw ? Math.round(parseFloat(minOrderRaw) * 100) : null,
+      max_uses: maxUsesRaw ? parseInt(maxUsesRaw) : null,
+      expires_at: expiresRaw ? new Date(expiresRaw).toISOString() : null
+    };
+
+    const data = await apiFetch('/api/admin/codes', { method: 'POST', body: JSON.stringify(body) });
+    if (data.error) {
+      msgEl.innerHTML = `<span class="error-msg">${data.error}</span>`;
+    } else {
+      msgEl.innerHTML = '<span class="success-msg">Code created.</span>';
+      document.getElementById('new-code').value = '';
+      document.getElementById('new-value').value = '';
+      loadCodes();
+    }
+  }
+
+  async function toggleCode(id, currentlyActive) {
+    await apiFetch(`/api/admin/codes?id=${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_active: !currentlyActive })
+    });
+    loadCodes();
+  }
+
+  async function deleteCode(id, code) {
+    if (!confirm(`Delete code ${code}? This cannot be undone.`)) return;
+    await apiFetch(`/api/admin/codes?id=${id}`, { method: 'DELETE' });
+    loadCodes();
+  }
+
+  // ── AFFILIATES ──────────────────────────────────────
+
+  async function loadAffiliates() {
+    const data = await apiFetch('/api/admin/affiliates');
+    const wrap = document.getElementById('affiliates-table-wrap');
+
+    // Populate affiliate dropdowns
+    const affiliateSelects = ['new-affiliate', 'ledger-affiliate-filter', 'pay-affiliate'];
+    affiliateSelects.forEach(selId => {
+      const sel = document.getElementById(selId);
+      if (!sel) return;
+      const isFilter = selId === 'ledger-affiliate-filter';
+      sel.innerHTML = isFilter
+        ? '<option value="">All Affiliates</option>'
+        : (selId === 'new-affiliate' ? '<option value="">None</option>' : '');
+      (data.affiliates || []).forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = `${a.name}${isFilter ? '' : ` (${(a.commission_rate * 100).toFixed(0)}%)`}`;
+        sel.appendChild(opt);
+      });
+    });
+
+    if (!data.affiliates?.length) { wrap.innerHTML = '<p style="opacity:.5;font-size:14px">No affiliates yet.</p>'; return; }
+
+    wrap.innerHTML = `<table>
+      <thead><tr>
+        <th>Name</th><th>Email</th><th>Rate</th>
+        <th>Earned</th><th>Paid</th><th>Outstanding</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody>${data.affiliates.map(a => `
+        <tr>
+          <td>${a.name}</td>
+          <td>${a.email || '—'}</td>
+          <td>${(a.commission_rate * 100).toFixed(0)}%</td>
+          <td>${fmt$(a.total_earned_cents)}</td>
+          <td>${fmt$(a.total_paid_cents)}</td>
+          <td style="color:${a.outstanding_cents > 0 ? '#F7813E' : '#fffce3'}">${fmt$(a.outstanding_cents)}</td>
+          <td><span class="badge ${a.is_active ? 'badge-green' : 'badge-red'}">${a.is_active ? 'Active' : 'Inactive'}</span></td>
+          <td>
+            <button class="btn btn-sm btn-ghost" onclick="toggleAffiliate(${a.id}, ${a.is_active})">${a.is_active ? 'Deactivate' : 'Reactivate'}</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }
+
+  async function createAffiliate() {
+    const name = document.getElementById('aff-name').value.trim();
+    const email = document.getElementById('aff-email').value.trim();
+    const rate = parseFloat(document.getElementById('aff-rate').value);
+    const notes = document.getElementById('aff-notes').value.trim();
+    const msgEl = document.getElementById('create-aff-msg');
+
+    if (!name || isNaN(rate)) { msgEl.innerHTML = '<span class="error-msg">Name and commission rate required.</span>'; return; }
+
+    const data = await apiFetch('/api/admin/affiliates', {
+      method: 'POST',
+      body: JSON.stringify({ name, email: email || null, commission_rate: rate, notes: notes || null })
+    });
+    if (data.error) {
+      msgEl.innerHTML = `<span class="error-msg">${data.error}</span>`;
+    } else {
+      msgEl.innerHTML = '<span class="success-msg">Affiliate added.</span>';
+      ['aff-name','aff-email','aff-rate','aff-notes'].forEach(id => document.getElementById(id).value = '');
+      loadAffiliates();
+    }
+  }
+
+  async function toggleAffiliate(id, currentlyActive) {
+    await apiFetch(`/api/admin/affiliates?id=${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_active: !currentlyActive })
+    });
+    loadAffiliates();
+  }
+
+  // ── LEDGER ──────────────────────────────────────────
+
+  async function loadLedger() {
+    const affId = document.getElementById('ledger-affiliate-filter').value;
+    const url = `/api/admin/ledger${affId ? `?affiliate_id=${affId}` : ''}`;
+    const data = await apiFetch(url);
+
+    // Summary cards
+    const summaryEl = document.getElementById('ledger-summary');
+    summaryEl.innerHTML = (data.summary || []).map(s => `
+      <div class="card" style="margin-bottom:12px">
+        <strong style="color:#F7813E">${s.name}</strong>
+        <span style="margin-left:16px;font-size:12px;opacity:.6">${(s.commission_rate * 100).toFixed(0)}% commission</span>
+        <div style="margin-top:10px">
+          <span class="stat"><span class="stat-label">Earned</span><br><span class="stat-value">${fmt$(s.total_earned_cents)}</span></span>
+          <span class="stat"><span class="stat-label">Paid</span><br><span class="stat-value">${fmt$(s.total_paid_cents)}</span></span>
+          <span class="stat"><span class="stat-label">Outstanding</span><br><span class="stat-value" style="color:${s.outstanding_cents > 0 ? '#F7813E' : '#8dce8d'}">${fmt$(s.outstanding_cents)}</span></span>
+        </div>
+      </div>`).join('') || '<p style="opacity:.5;font-size:14px">No data.</p>';
+
+    // Ledger entries
+    const ledgerWrap = document.getElementById('ledger-table-wrap');
+    if (!data.ledger?.length) {
+      ledgerWrap.innerHTML = '<p style="opacity:.5;font-size:14px">No entries.</p>';
+    } else {
+      ledgerWrap.innerHTML = `<table>
+        <thead><tr><th>Date</th><th>Affiliate</th><th>Amount</th><th>Order</th><th>Note</th></tr></thead>
+        <tbody>${data.ledger.map(e => `
+          <tr>
+            <td>${new Date(e.created_at).toLocaleDateString()}</td>
+            <td>${e.affiliate_name}</td>
+            <td style="color:${e.amount_cents >= 0 ? '#8dce8d' : '#e08080'}">${fmt$(e.amount_cents)}</td>
+            <td style="font-size:12px;opacity:.7">${e.discount_code || ''} ${e.usage_session_id ? e.usage_session_id.slice(0,16) + '…' : ''}</td>
+            <td style="font-size:13px;opacity:.8">${e.note || ''}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    }
+
+    // Payments
+    const paymentsWrap = document.getElementById('payments-table-wrap');
+    if (!data.payments?.length) {
+      paymentsWrap.innerHTML = '<p style="opacity:.5;font-size:14px">No payments recorded.</p>';
+    } else {
+      paymentsWrap.innerHTML = `<table>
+        <thead><tr><th>Date</th><th>Affiliate</th><th>Amount</th><th>Note</th></tr></thead>
+        <tbody>${data.payments.map(p => `
+          <tr>
+            <td>${new Date(p.paid_at).toLocaleDateString()}</td>
+            <td>${p.affiliate_name}</td>
+            <td style="color:#8dce8d">${fmt$(p.amount_cents)}</td>
+            <td style="font-size:13px;opacity:.8">${p.note || ''}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    }
+  }
+
+  async function recordPayment() {
+    const affiliateId = document.getElementById('pay-affiliate').value;
+    const amountRaw = document.getElementById('pay-amount').value;
+    const note = document.getElementById('pay-note').value.trim();
+    const msgEl = document.getElementById('payment-msg');
+
+    if (!affiliateId || !amountRaw) { msgEl.innerHTML = '<span class="error-msg">Affiliate and amount required.</span>'; return; }
+
+    const amount_cents = Math.round(parseFloat(amountRaw) * 100);
+    const data = await apiFetch('/api/admin/ledger?action=payment', {
+      method: 'POST',
+      body: JSON.stringify({ affiliate_id: parseInt(affiliateId), amount_cents, note: note || null })
+    });
+    if (data.error) {
+      msgEl.innerHTML = `<span class="error-msg">${data.error}</span>`;
+    } else {
+      msgEl.innerHTML = '<span class="success-msg">Payment recorded.</span>';
+      document.getElementById('pay-amount').value = '';
+      document.getElementById('pay-note').value = '';
+      loadLedger();
+      loadAffiliates();
+    }
+  }
+
+  async function init() {
+    await loadAffiliates();
+    await loadCodes();
+  }
+</script>
+</body>
+</html>

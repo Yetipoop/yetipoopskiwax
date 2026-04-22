@@ -1,10 +1,12 @@
 // POST /api/webhook
-// Handles Stripe checkout.session.completed events
-// Creates the corresponding order in Printful and emails the customer
+// Handles Stripe checkout.session.completed events.
+// Creates the corresponding order in Printful, emails the customer,
+// and records discount code usage + affiliate commission.
 
 const Stripe = require('stripe');
 const nodemailer = require('nodemailer');
 const products = require('./products-data');
+const { getDb } = require('./_db');
 
 function getProductInfo(productId, variantId) {
   const product = products.find(p => p.id === productId);
@@ -59,13 +61,10 @@ async function getRawBody(req) {
   });
 }
 
-// Look up artwork info by Printful variant_id
 function getArtworkForVariant(variantId) {
   for (const product of products) {
     const variant = product.variants.find(v => v.id === variantId);
     if (variant) {
-      // artworkFiles = multi-file products (e.g. hoodie: front + back)
-      // artworkFileType = legacy single-file products
       const files = product.artworkFiles
         ? product.artworkFiles.map(f => ({ type: f.type, url: f.url }))
         : [{ type: product.artworkFileType, url: product.artworkUrl }];
@@ -76,6 +75,68 @@ function getArtworkForVariant(variantId) {
     }
   }
   return null;
+}
+
+// Record discount usage and affiliate commission (non-blocking — errors are logged, not thrown)
+async function recordDiscountUsage(session) {
+  const codeId = session.metadata?.discount_code_id;
+  if (!codeId) return;
+
+  const discountAmountCents = Number(session.metadata?.discount_amount_cents || 0);
+  const cartSubtotalCents = Number(session.metadata?.cart_subtotal_cents || 0);
+  const customerEmail = session.customer_details?.email || null;
+
+  try {
+    const sql = getDb();
+
+    // Record usage
+    const usageRows = await sql`
+      INSERT INTO discount_code_usages
+        (code_id, stripe_session_id, customer_email, order_subtotal_cents, discount_amount_cents)
+      VALUES (${codeId}, ${session.id}, ${customerEmail}, ${cartSubtotalCents}, ${discountAmountCents})
+      RETURNING id
+    `;
+    const usageId = usageRows[0]?.id;
+
+    // Increment uses_count on the code
+    await sql`
+      UPDATE discount_codes SET uses_count = uses_count + 1 WHERE id = ${codeId}
+    `;
+
+    // Look up code to check if affiliate-linked
+    const codeRows = await sql`
+      SELECT dc.affiliate_id, dc.code, a.commission_rate
+      FROM discount_codes dc
+      LEFT JOIN affiliates a ON a.id = dc.affiliate_id
+      WHERE dc.id = ${codeId}
+    `;
+    const code = codeRows[0];
+
+    if (code?.affiliate_id && code?.commission_rate) {
+      // Commission is on the net order total (subtotal minus discount, i.e. what we actually charged)
+      const netRevenueCents = (session.amount_total || 0);
+      const commissionCents = Math.round(netRevenueCents * Number(code.commission_rate));
+
+      await sql`
+        INSERT INTO commission_ledger
+          (affiliate_id, usage_id, stripe_session_id, amount_cents, note)
+        VALUES (
+          ${code.affiliate_id},
+          ${usageId},
+          ${session.id},
+          ${commissionCents},
+          ${`Order via code ${code.code} — ${(commissionCents / 100).toFixed(2)} commission at ${(Number(code.commission_rate) * 100).toFixed(1)}%`}
+        )
+      `;
+
+      console.log(`[WEBHOOK] Commission recorded: $${(commissionCents / 100).toFixed(2)} for affiliate ${code.affiliate_id}`);
+    }
+
+    console.log(`[WEBHOOK] Discount usage recorded: code ${codeId}, session ${session.id}`);
+  } catch (e) {
+    // Log but don't block the order — commission can be manually adjusted
+    console.error('[WEBHOOK] Discount/commission recording error:', e.message);
+  }
 }
 
 module.exports = async function handler(req, res) {
@@ -90,7 +151,6 @@ module.exports = async function handler(req, res) {
   const printfulToken = process.env.PRINTFUL_API_TOKEN;
   const printfulStoreId = process.env.PRINTFUL_STORE_ID;
 
-  // Read raw body for Stripe signature verification
   let rawBody;
   if (typeof req.body === 'string' || Buffer.isBuffer(req.body)) {
     rawBody = req.body;
@@ -110,7 +170,6 @@ module.exports = async function handler(req, res) {
     rawBodyLength: rawBody?.length
   });
 
-  // Verify Stripe signature
   let event;
   try {
     const sig = req.headers['stripe-signature'];
@@ -136,7 +195,8 @@ module.exports = async function handler(req, res) {
       sessionId: session.id,
       cartItemCount: cartItems.length,
       hasShipping: !!shipping?.address,
-      customerEmail: customer?.email
+      customerEmail: customer?.email,
+      discountCode: session.metadata?.discount_code || 'none'
     });
 
     if (!cartItems.length || !shipping?.address) {
@@ -146,7 +206,6 @@ module.exports = async function handler(req, res) {
 
     const addr = shipping.address;
 
-    // Build Printful order
     const printfulOrder = {
       external_id: session.id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 32),
       recipient: {
@@ -179,8 +238,6 @@ module.exports = async function handler(req, res) {
 
     console.log('[WEBHOOK] Sending order to Printful:', JSON.stringify(printfulOrder, null, 2));
 
-    // LIVE: ?confirm=true submits order to production immediately
-    // TESTING: remove ?confirm=true to create as draft
     const response = await fetch('https://api.printful.com/orders?confirm=true', {
       method: 'POST',
       headers: {
@@ -196,13 +253,15 @@ module.exports = async function handler(req, res) {
 
     if (!response.ok) {
       console.error('[WEBHOOK] Printful error:', response.status, result);
-      // Return 200 so Stripe does not retry — log error for manual review
       return res.status(200).json({ received: true, printfulError: result });
     }
 
     console.log(`[WEBHOOK] Order created in Printful: ${result.result?.id} for session ${session.id}`);
 
-    // Send order confirmation email to customer (non-blocking)
+    // Record discount usage + affiliate commission (non-blocking)
+    recordDiscountUsage(session);
+
+    // Send order confirmation email (non-blocking)
     const customerEmail = customer?.email;
     if (customerEmail && process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
       sendOrderConfirmationEmail({
@@ -227,7 +286,6 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// Required for Stripe webhook signature verification
 export const config = {
   api: { bodyParser: false }
 };
