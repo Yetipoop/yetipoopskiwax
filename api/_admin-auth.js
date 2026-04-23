@@ -1,13 +1,17 @@
 // Shared admin authentication helper
-// Checks Authorization: Bearer <password> against ADMIN_PASSWORD env var
+// Accepts either:
+//   Authorization: Bearer <password>   (curl / fetch with headers)
+//   ?token=<password>                  (query param, for GET-only tools like web_fetch)
 
 function checkAdminAuth(req) {
   const password = process.env.ADMIN_PASSWORD;
   if (!password) return 'ADMIN_PASSWORD env var not set';
 
-  const auth = req.headers['authorization'] || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  const auth  = req.headers['authorization'] || '';
+  const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  const qtoken = req.query?.token || '';
 
+  const token = bearer || qtoken;
   if (!token || token !== password) return 'Unauthorized';
   return null; // null = auth passed
 }
