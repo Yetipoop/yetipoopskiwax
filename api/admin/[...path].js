@@ -16,6 +16,7 @@
 
 const { getDb } = require('../_db');
 const { checkAdminAuth } = require('../_admin-auth');
+const { getRows, appendRows, syncStripe, syncPrintful, computeReport } = require('../_accounting');
 
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -337,6 +338,86 @@ module.exports = async function handler(req, res) {
       }
 
       return res.status(400).json({ error: 'action must be payment or adjustment' });
+    }
+
+    return res.status(405).end();
+  }
+
+  // ── ACCOUNTING ────────────────────────────────────────────────────────────
+
+  if (route === 'accounting') {
+    if (!process.env.ACCOUNTING_SHEET_ID) {
+      return res.status(500).json({ error: 'ACCOUNTING_SHEET_ID env var not set in Vercel' });
+    }
+
+    // GET — fetch rows or a computed report
+    if (req.method === 'GET') {
+      try {
+        const rows = await getRows();
+        const type = req.query?.type || 'rows';
+
+        if (type === 'rows') {
+          return res.status(200).json({ rows, count: rows.length });
+        }
+
+        const period = req.query?.period || null;
+        const year   = req.query?.year   ? parseInt(req.query.year) : null;
+        const report = computeReport(rows, { period, year });
+        return res.status(200).json({ report, period, year });
+      } catch (e) {
+        console.error('accounting GET error:', e);
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    // POST — log a manual expense OR sync Stripe/Printful
+    if (req.method === 'POST') {
+      const { action } = req.body || {};
+
+      // Log a single manual expense
+      if (action === 'log') {
+        const { date, source, type, category, description, amount } = req.body;
+        if (!date || !type || !category || !description || amount === undefined) {
+          return res.status(400).json({ error: 'date, type, category, description, amount required' });
+        }
+        const ext_id = `manual_${date}_${Math.random().toString(36).slice(2, 10)}`;
+        try {
+          await appendRows([{ date, source: source || 'manual', type, category,
+                              description, amount: parseFloat(amount), ext_id }]);
+          return res.status(201).json({ ok: true, ext_id });
+        } catch (e) {
+          console.error('accounting log error:', e);
+          return res.status(500).json({ error: e.message });
+        }
+      }
+
+      // Sync Stripe + Printful
+      if (action === 'sync') {
+        try {
+          const existingRows = await getRows();
+          const seen = new Set(existingRows.map(r => r.ext_id));
+
+          const [stripeRows, printfulRows] = await Promise.all([
+            syncStripe(seen),
+            syncPrintful(seen),
+          ]);
+
+          const allNew = [...stripeRows, ...printfulRows];
+          if (allNew.length) await appendRows(allNew);
+
+          return res.status(200).json({
+            ok: true,
+            added: allNew.length,
+            stripe: stripeRows.length,
+            printful: printfulRows.length,
+          });
+        } catch (e) {
+          console.error('accounting sync error:', e);
+          return res.status(500).json({ error: e.message });
+        }
+      }
+
+      return res.status(400).json({ error: 'action must be log or sync' });
     }
 
     return res.status(405).end();
