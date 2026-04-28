@@ -253,6 +253,31 @@ module.exports = async function handler(req, res) {
 
     if (!response.ok) {
       console.error('[WEBHOOK] Printful error:', response.status, result);
+
+      // Alert via email — order needs manual confirmation in Printful
+      if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+        const transporter = require('nodemailer').createTransport({
+          service: 'gmail',
+          auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD }
+        });
+        transporter.sendMail({
+          from: `"Yeti Poop Ski Wax" <${process.env.GMAIL_USER}>`,
+          to: 'yetipoopskiwax@gmail.com',
+          subject: '⚠️ Printful order needs manual confirmation',
+          text: [
+            `A Printful order failed to auto-confirm for Stripe session ${session.id}.`,
+            ``,
+            `Printful error: ${result?.error?.message || result?.result || JSON.stringify(result)}`,
+            `Error code: ${result?.error?.code ?? 'unknown'}`,
+            ``,
+            `Customer: ${customer?.email || 'unknown'}`,
+            ``,
+            `Go to Printful dashboard to confirm manually:`,
+            `https://www.printful.com/dashboard/orders`
+          ].join('\n')
+        }).catch(err => console.error('[WEBHOOK] Alert email failed:', err.message));
+      }
+
       return res.status(200).json({ received: true, printfulError: result });
     }
 
