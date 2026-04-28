@@ -16,6 +16,17 @@ const products = [
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkUrl: `${SITE}/artwork/tee-logo-dark.png`,
     artworkFileType: 'front',
+    sizeChart: {
+      note: 'Measurements in inches, laid flat — Gildan 5000B',
+      columns: ['Size', 'Width', 'Length'],
+      rows: [
+        ['XS', '16"', '20.5"'],
+        ['S',  '17"', '22"'],
+        ['M',  '18"', '23.5"'],
+        ['L',  '19"', '25"'],
+        ['XL', '20"', '26.5"'],
+      ]
+    },
     // Options drive the selector UI on the product page
     options: [
       {
@@ -48,6 +59,20 @@ const products = [
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkUrl: `${SITE}/artwork/tee-logo-dark.png`,
     artworkFileType: 'front_dtf',
+    sizeChart: {
+      note: 'Measurements in inches, laid flat — Gildan 8000',
+      columns: ['Size', 'Width', 'Length'],
+      rows: [
+        ['S',   '18"', '28"'],
+        ['M',   '20"', '29"'],
+        ['L',   '22"', '30"'],
+        ['XL',  '24"', '31"'],
+        ['2XL', '26"', '32"'],
+        ['3XL', '28"', '33"'],
+        ['4XL', '30"', '34"'],
+        ['5XL', '32"', '35"'],
+      ]
+    },
     options: [
       {
         id: 1,
@@ -92,6 +117,20 @@ const products = [
     id: 'yeti-hoodie-adult',
     title: 'Adult hoodie',
     description: 'Pull this 50/50 poly/cotton blend hoodie from your pack. Show your blue poo steeze front and back!',
+    sizeChart: {
+      note: 'Measurements in inches, laid flat — Gildan 18500',
+      columns: ['Size', 'Width', 'Length'],
+      rows: [
+        ['S',   '20"', '26"'],
+        ['M',   '22"', '27"'],
+        ['L',   '24"', '28"'],
+        ['XL',  '26"', '29"'],
+        ['2XL', '28"', '30"'],
+        ['3XL', '30"', '31"'],
+        ['4XL', '32"', '32"'],
+        ['5XL', '34"', '33"'],
+      ]
+    },
     images: [{ src: `${SITE}/artwork/hoodie-adult-navy-front.jpg` }],
     artworkFiles: [
       { type: 'default', url: `${SITE}/artwork/hoodie-adult-front.png` },
@@ -168,6 +207,17 @@ const products = [
     id: 'yeti-hoodie-youth',
     title: 'Grom hoodie',
     description: 'We think you should…buy your kids this hood(ie). 50/50 poly/cotton blend. Comfort and blue poo steeze for days.',
+    sizeChart: {
+      note: 'Measurements in inches, laid flat — Gildan 18500B',
+      columns: ['Size', 'Width', 'Length'],
+      rows: [
+        ['XS', '16"', '19.75"'],
+        ['S',  '17"', '21"'],
+        ['M',  '18"', '22.5"'],
+        ['L',  '19"', '24"'],
+        ['XL', '20"', '25.5"'],
+      ]
+    },
     images: [{ src: `${SITE}/artwork/hoodie-youth-navy-front.jpg` }],
     artworkFiles: [
       { type: 'default', url: `${SITE}/artwork/hoodie-youth-front.png` },
@@ -243,6 +293,13 @@ const products = [
     id: 'yeti-hat',
     title: 'Dad hat',
     description: 'Do you want to be the only dad not flaunting his superior taste in scatalogical ski wax after Father\'s Day? We didn\'t think so.',
+    sizeChart: {
+      note: 'Adjustable strap — Otto Cap 18-772',
+      columns: ['Size', 'Head Circumference'],
+      rows: [
+        ['One Size', '21.65″ – 25.19″'],
+      ]
+    },
     images: [{ src: `${SITE}/artwork/hat-mockup-navy.jpg` }],
     artworkUrl: `${SITE}/artwork/hat-logo-dark.png`,
     artworkFileType: 'front_dtf_hat',

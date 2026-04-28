@@ -626,6 +626,69 @@ footer {
 }
 
 /* ============================================
+   SIZE CHART
+   ============================================ */
+
+.size-chart {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.size-chart h3 {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: var(--teal);
+}
+
+.size-chart-note {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  margin-bottom: 1rem;
+  letter-spacing: 0.04em;
+}
+
+.size-chart-scroll {
+  overflow-x: auto;
+}
+
+.size-chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.size-chart-table th {
+  text-align: left;
+  padding: 0.5rem 1.25rem;
+  background: var(--bg-nav);
+  color: var(--teal);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.size-chart-table td {
+  padding: 0.5rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 252, 227, 0.07);
+  color: var(--text);
+}
+
+.size-chart-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.size-chart-table tbody tr:hover {
+  background: rgba(255, 252, 227, 0.04);
+}
+
+/* ============================================
    UTILITY
    ============================================ */
 

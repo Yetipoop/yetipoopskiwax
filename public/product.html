@@ -169,7 +169,8 @@
               Select options
             </button>
           </div>
-        </div>`;
+        </div>
+        ${renderSizeChart(p)}`;
 
       // Auto-select any option that has exactly one value (no real choice to make),
       // then check if all options are satisfied so the button can enable immediately.
@@ -251,6 +252,26 @@
           return v.options?.includes(selectedValueObj.id);
         });
       }) || currentProduct.variants[0];
+    }
+
+    function renderSizeChart(p) {
+      if (!p.sizeChart) return '';
+      const { note, columns, rows } = p.sizeChart;
+      const headers = columns.map(c => `<th>${c}</th>`).join('');
+      const bodyRows = rows.map(row =>
+        `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
+      ).join('');
+      return `
+        <div class="size-chart">
+          <h3>Size Chart</h3>
+          ${note ? `<p class="size-chart-note">${note}</p>` : ''}
+          <div class="size-chart-scroll">
+            <table class="size-chart-table">
+              <thead><tr>${headers}</tr></thead>
+              <tbody>${bodyRows}</tbody>
+            </table>
+          </div>
+        </div>`;
     }
 
     loadProduct();
