@@ -18,7 +18,7 @@ function getProductInfo(productId, variantId) {
   };
 }
 
-async function sendOrderConfirmationEmail({ to, name, cartItems, amountTotal, gmailUser, gmailPass }) {
+async function sendOrderConfirmationEmail({ to, name, cartItems, amountTotal, gmailUser, gmailPass, sessionId }) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: { user: gmailUser, pass: gmailPass }
@@ -40,7 +40,8 @@ async function sendOrderConfirmationEmail({ to, name, cartItems, amountTotal, gm
       <p style="color:#fffce3;margin:0 0 24px;">Hey ${name}, your order is in. Here's what's coming:</p>
       <table style="width:100%;border-top:1px solid #fffce355;margin-bottom:16px;">${itemRows}</table>
       <p style="color:#fffce3;border-top:1px solid #fffce355;padding-top:16px;margin:0 0 24px;">Total: $${total}</p>
-      <p style="color:#fffce3;margin:0 0 24px;">Estimated delivery: 5–10 business days. You'll get a tracking number when it ships.</p>
+      <p style="color:#fffce3;margin:0 0 16px;">Estimated delivery: 5–10 business days. You'll get a tracking number when it ships.</p>
+      <p style="color:#fffce3;opacity:0.6;font-size:12px;margin:0 0 24px;">Order reference: ${sessionId} — save this if you ever need to report an issue at yetipoopskiwax.com/returns.html</p>
       <p style="color:#F7813E;margin:0;">— Yeti Poop Ski Wax</p>
     </div>`;
 
@@ -295,7 +296,8 @@ module.exports = async function handler(req, res) {
         cartItems,
         amountTotal: session.amount_total || 0,
         gmailUser: process.env.GMAIL_USER,
-        gmailPass: process.env.GMAIL_APP_PASSWORD
+        gmailPass: process.env.GMAIL_APP_PASSWORD,
+        sessionId: session.id
       }).then(() => {
         console.log(`[WEBHOOK] Confirmation email sent to ${customerEmail}`);
       }).catch(err => {

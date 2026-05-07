@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Returns & Replacements — Yeti Poop Ski Wax</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" type="image/png" href="/images/logo-dark.png">
+  <style>
+    .returns-section {
+      min-height: 80vh;
+      padding: 80px 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .returns-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 540px;
+      width: 100%;
+    }
+    .returns-card h1 { color: var(--teal); font-size: 28px; margin: 0 0 8px; }
+    .subtitle { color: var(--text); opacity: 0.7; margin: 0 0 32px; font-size: 15px; line-height: 1.5; }
+
+    .step { display: none; }
+    .step.active { display: block; }
+
+    label { display: block; color: var(--text); margin-bottom: 6px; font-size: 14px; }
+    input[type="text"], input[type="email"] {
+      width: 100%; box-sizing: border-box;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px 14px; color: var(--text); font-family: var(--font-body);
+      font-size: 15px; margin-bottom: 20px; outline: none;
+    }
+    input[type="text"]:focus, input[type="email"]:focus { border-color: var(--teal); }
+
+    .issue-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .issue-option {
+      background: var(--bg); border: 2px solid var(--border);
+      border-radius: 8px; padding: 14px 16px; cursor: pointer; transition: border-color 0.15s;
+    }
+    .issue-option:hover { border-color: var(--teal); }
+    .issue-option.selected { border-color: var(--teal); background: var(--bg-nav); }
+    .issue-option input[type="radio"] { display: none; }
+    .issue-option .issue-title { color: var(--text); font-size: 15px; margin: 0 0 4px; }
+    .issue-option .issue-desc { color: var(--text); opacity: 0.6; font-size: 13px; margin: 0; }
+
+    .photo-section {
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      display: none;
+    }
+    .photo-section:hover { border-color: var(--teal); }
+    .photo-section.has-photo { border-color: var(--teal); border-style: solid; }
+    .photo-section input[type="file"] { display: none; }
+    .photo-label { color: var(--text); opacity: 0.7; font-size: 14px; margin: 0 0 4px; }
+    .photo-required-badge {
+      display: inline-block;
+      background: var(--teal);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .photo-preview { max-width: 100%; max-height: 160px; border-radius: 6px; margin-top: 10px; display: none; }
+    .photo-hint { color: var(--text); opacity: 0.5; font-size: 12px; margin: 6px 0 0; }
+
+    .order-summary { background: var(--bg); border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+    .order-summary .order-ref { color: var(--teal); font-size: 13px; margin: 0 0 8px; }
+    .order-summary .order-items { color: var(--text); font-size: 14px; margin: 0; line-height: 1.7; }
+
+    .btn-primary {
+      background: var(--teal); color: #fff; border: none; border-radius: 6px;
+      padding: 13px 28px; font-family: var(--font-body); font-size: 15px;
+      cursor: pointer; width: 100%; transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-back {
+      background: transparent; border: 1px solid var(--border); color: var(--text);
+      border-radius: 6px; padding: 10px 20px; font-family: var(--font-body);
+      font-size: 14px; cursor: pointer; margin-bottom: 16px; opacity: 0.7;
+    }
+    .btn-back:hover { opacity: 1; }
+
+    .error-msg {
+      background: #8B1A1A44; border: 1px solid #c0392b; color: #ff8888;
+      border-radius: 6px; padding: 12px 14px; font-size: 14px; margin-bottom: 16px; display: none;
+    }
+    .review-note {
+      background: var(--bg); border-radius: 8px; padding: 16px;
+      margin: 16px 0 24px; color: var(--text); font-size: 14px; line-height: 1.6;
+    }
+    .step-indicator { display: flex; gap: 6px; margin-bottom: 28px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+    .step-dot.active { background: var(--teal); }
+    .step-dot.done { background: var(--teal); opacity: 0.4; }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="/"><img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax"></a>
+      <ul class="nav-links">
+        <li><a href="/shop.html">Shop Gear</a></li>
+        <li><a href="/wax.html" class="wax-link">Shop Wax</a></li>
+        <li><a href="/#about">About Us</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="returns-section">
+    <div class="returns-card">
+
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot-1"></div>
+        <div class="step-dot" id="dot-2"></div>
+        <div class="step-dot" id="dot-3"></div>
+      </div>
+
+      <!-- Step 1: Order lookup -->
+      <div class="step active" id="step-1">
+        <h1>Returns &amp; Replacements</h1>
+        <p class="subtitle">Got the wrong item, a damaged product, or something never showed up? Submit a claim and we'll review it within 1 business day.</p>
+
+        <div class="error-msg" id="lookup-error"></div>
+
+        <label for="order-ref">Order reference</label>
+        <input type="text" id="order-ref" placeholder="Found in your confirmation email" autocomplete="off">
+
+        <label for="cust-email">Email used at checkout</label>
+        <input type="email" id="cust-email" placeholder="you@example.com" autocomplete="email">
+
+        <button class="btn-primary" id="lookup-btn" onclick="lookupOrder()">Look up order</button>
+      </div>
+
+      <!-- Step 2: Issue type + photo -->
+      <div class="step" id="step-2">
+        <button class="btn-back" onclick="goToStep(1)">&#8592; Back</button>
+        <h1>What went wrong?</h1>
+
+        <div class="order-summary" id="order-summary"></div>
+        <div class="error-msg" id="issue-error"></div>
+
+        <div class="issue-options">
+          <label class="issue-option" id="opt-wrong_item" onclick="onIssueSelect('wrong_item')">
+            <input type="radio" name="issue" value="wrong_item">
+            <p class="issue-title">Wrong item received</p>
+            <p class="issue-desc">Got the wrong size, color, or product → replacement will be sent</p>
+          </label>
+          <label class="issue-option" id="opt-damaged" onclick="onIssueSelect('damaged')">
+            <input type="radio" name="issue" value="damaged">
+            <p class="issue-title">Item arrived damaged <span class="photo-required-badge">photo required</span></p>
+            <p class="issue-desc">Physical damage from shipping → replacement will be sent</p>
+          </label>
+          <label class="issue-option" id="opt-print_quality" onclick="onIssueSelect('print_quality')">
+            <input type="radio" name="issue" value="print_quality">
+            <p class="issue-title">Print quality defect <span class="photo-required-badge">photo required</span></p>
+            <p class="issue-desc">Fading, misprint, or poor quality → replacement will be sent</p>
+          </label>
+          <label class="issue-option" id="opt-lost" onclick="onIssueSelect('lost')">
+            <input type="radio" name="issue" value="lost">
+            <p class="issue-title">Never arrived</p>
+            <p class="issue-desc">No delivery after 3+ weeks → full refund</p>
+          </label>
+        </div>
+
+        <!-- Photo upload (shown for damaged / print_quality) -->
+        <div class="photo-section" id="photo-section" onclick="document.getElementById('photo-input').click()">
+          <input type="file" id="photo-input" accept="image/*" onchange="onPhotoSelected(event)">
+          <p class="photo-label">📷 Tap to attach a photo of the issue</p>
+          <img id="photo-preview" class="photo-preview" alt="Preview">
+          <p class="photo-hint">JPEG or PNG, max 10MB — compressed automatically</p>
+        </div>
+
+        <button class="btn-primary" id="submit-btn" onclick="submitClaim()">Submit claim</button>
+      </div>
+
+      <!-- Step 3: Under review -->
+      <div class="step" id="step-3">
+        <h1 style="font-size:24px;">Claim submitted.</h1>
+        <div class="review-note">
+          We've received your claim and will review it within <strong>1 business day</strong>. You'll get an email once it's been processed.
+        </div>
+        <p style="color:var(--text);opacity:0.7;font-size:14px;">Questions? <a href="mailto:yetipoopskiwax@gmail.com" style="color:var(--teal);">yetipoopskiwax@gmail.com</a></p>
+        <a href="/shop.html" class="btn-primary" style="display:block;text-align:center;margin-top:24px;text-decoration:none;">Back to Shop</a>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo"><img src="/images/logo-dark.png" alt="Yeti Poop Ski Wax"></div>
+      <ul class="footer-links">
+        <li><a href="/shop.html">Shop Gear</a></li>
+        <li><a href="/wax.html">The Wax</a></li>
+        <li><a href="/contact.html">Contact</a></li>
+        <li><a href="/returns.html">Returns</a></li>
+      </ul>
+    </div>
+    <div class="container">
+      <p class="footer-copy">&copy; 2026 Yeti Poop Ski Wax. Kirkwood, CA.</p>
+    </div>
+  </footer>
+
+  <script>
+    let currentSessionId = null;
+    let currentEmail = null;
+    let photoBase64 = null;
+    const PHOTO_REQUIRED = ['damaged', 'print_quality'];
+
+    function goToStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-' + n).classList.add('active');
+      document.querySelectorAll('.step-dot').forEach((d, i) => {
+        d.classList.remove('active', 'done');
+        if (i + 1 < n) d.classList.add('done');
+        if (i + 1 === n) d.classList.add('active');
+      });
+    }
+
+    function showError(elId, msg) {
+      const el = document.getElementById(elId);
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    function hideError(elId) { document.getElementById(elId).style.display = 'none'; }
+
+    async function lookupOrder() {
+      hideError('lookup-error');
+      const sessionId = document.getElementById('order-ref').value.trim();
+      const email = document.getElementById('cust-email').value.trim();
+      if (!sessionId || !email) return showError('lookup-error', 'Please enter both your order reference and email.');
+
+      const btn = document.getElementById('lookup-btn');
+      btn.disabled = true; btn.textContent = 'Looking up...';
+
+      try {
+        const res = await fetch('/api/order-lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, email })
+        });
+        const data = await res.json();
+        if (!res.ok) return showError('lookup-error', data.error || 'Order not found.');
+
+        currentSessionId = data.sessionId;
+        currentEmail = data.email;
+
+        const date = new Date(data.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        document.getElementById('order-summary').innerHTML =
+          `<p class="order-ref">Order from ${date}</p><p class="order-items">${data.items.join('<br>')}</p>`;
+
+        goToStep(2);
+      } catch (e) {
+        showError('lookup-error', 'Something went wrong. Please try again.');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Look up order';
+      }
+    }
+
+    function onIssueSelect(type) {
+      document.querySelectorAll('.issue-option').forEach(o => o.classList.remove('selected'));
+      document.getElementById('opt-' + type).classList.add('selected');
+      document.querySelector(`input[value="${type}"]`).checked = true;
+
+      const photoSection = document.getElementById('photo-section');
+      if (PHOTO_REQUIRED.includes(type)) {
+        photoSection.style.display = 'block';
+      } else {
+        photoSection.style.display = 'none';
+        photoBase64 = null;
+        document.getElementById('photo-preview').style.display = 'none';
+        document.getElementById('photo-section').classList.remove('has-photo');
+      }
+    }
+
+    function onPhotoSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Compress to max ~800px and 300KB via canvas
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const MAX = 900;
+          let w = img.width, h = img.height;
+          if (w > MAX || h > MAX) {
+            if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+            else { w = Math.round(w * MAX / h); h = MAX; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+          const preview = document.getElementById('photo-preview');
+          preview.src = photoBase64;
+          preview.style.display = 'block';
+          document.getElementById('photo-section').classList.add('has-photo');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function submitClaim() {
+      hideError('issue-error');
+      const selected = document.querySelector('input[name="issue"]:checked');
+      if (!selected) return showError('issue-error', 'Please select what went wrong with your order.');
+
+      if (PHOTO_REQUIRED.includes(selected.value) && !photoBase64) {
+        return showError('issue-error', 'Please attach a photo — it\'s required for this type of claim.');
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true; btn.textContent = 'Submitting...';
+
+      try {
+        const body = { sessionId: currentSessionId, email: currentEmail, issueType: selected.value };
+        if (photoBase64) body.photoBase64 = photoBase64;
+
+        const res = await fetch('/api/submit-claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) return showError('issue-error', data.error || 'Something went wrong. Please contact yetipoopskiwax@gmail.com.');
+
+        goToStep(3);
+      } catch (e) {
+        showError('issue-error', 'Something went wrong. Please contact yetipoopskiwax@gmail.com.');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Submit claim';
+      }
+    }
+
+    document.getElementById('cust-email').addEventListener('keydown', e => { if (e.key === 'Enter') lookupOrder(); });
+    document.getElementById('order-ref').addEventListener('keydown', e => { if (e.key === 'Enter') lookupOrder(); });
+  </script>
+</body>
+</html>
