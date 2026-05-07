@@ -16,6 +16,17 @@ const products = [
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkUrl: `${SITE}/artwork/tee-logo-dark.png`,
     artworkFileType: 'front',
+    sizeChart: {
+      headers: ['Size', 'Width', 'Length'],
+      rows: [
+        ['XS', '16"', '20½"'],
+        ['S',  '17"', '22"'],
+        ['M',  '18"', '23½"'],
+        ['L',  '19"', '25"'],
+        ['XL', '20"', '26½"'],
+      ],
+      note: 'Garment measurements in inches, laid flat. Width = half-chest, 1" below armhole. ±1" tolerance.'
+    },
     // Options drive the selector UI on the product page
     options: [
       {
@@ -48,6 +59,20 @@ const products = [
     images: [{ src: `${SITE}/artwork/tee-logo-dark.png` }],
     artworkUrl: `${SITE}/artwork/tee-logo-dark.png`,
     artworkFileType: 'front_dtf',
+    sizeChart: {
+      headers: ['Size', 'Width', 'Length'],
+      rows: [
+        ['S',   '18"', '28"'],
+        ['M',   '20"', '29"'],
+        ['L',   '22"', '30"'],
+        ['XL',  '24"', '31"'],
+        ['2XL', '26"', '32"'],
+        ['3XL', '28"', '33"'],
+        ['4XL', '30"', '34"'],
+        ['5XL', '32"', '35"'],
+      ],
+      note: 'Garment measurements in inches, laid flat. Width = half-chest, 1" below armhole. ±1" tolerance.'
+    },
     options: [
       {
         id: 1,
@@ -97,6 +122,20 @@ const products = [
       { type: 'default', url: `${SITE}/artwork/hoodie-adult-front.png` },
       { type: 'back',    url: `${SITE}/artwork/hoodie-adult-back.png` },
     ],
+    sizeChart: {
+      headers: ['Size', 'Width', 'Length'],
+      rows: [
+        ['S',   '20"', '26"'],
+        ['M',   '22"', '27"'],
+        ['L',   '24"', '28"'],
+        ['XL',  '26"', '29"'],
+        ['2XL', '28"', '30"'],
+        ['3XL', '30"', '31"'],
+        ['4XL', '32"', '32"'],
+        ['5XL', '34"', '33"'],
+      ],
+      note: 'Garment measurements in inches, laid flat. Width = half-chest, 1" below armhole. ±1" tolerance.'
+    },
     // Color value IDs: Navy=1, Indigo Blue=2, Graphite Heather=3, Military Green=4
     // Size value IDs:  S=5, M=6, L=7, XL=8, 2XL=9, 3XL=10, 4XL=11, 5XL=12
     options: [
@@ -173,6 +212,17 @@ const products = [
       { type: 'default', url: `${SITE}/artwork/hoodie-youth-front.png` },
       { type: 'back',    url: `${SITE}/artwork/hoodie-youth-back.png` },
     ],
+    sizeChart: {
+      headers: ['Size', 'Width', 'Length'],
+      rows: [
+        ['XS', '16"', '19¾"'],
+        ['S',  '17"', '21¼"'],
+        ['M',  '18"', '22½"'],
+        ['L',  '19"', '24"'],
+        ['XL', '20"', '25½"'],
+      ],
+      note: 'Garment measurements in inches, laid flat. Width = half-chest, 1" below armhole. ±1" tolerance.'
+    },
     // Color value IDs: Navy=1, Dark Heather=2
     // Size value IDs:  XS=3, S=4, M=5, L=6, XL=7
     options: [
@@ -246,6 +296,9 @@ const products = [
     images: [{ src: `${SITE}/artwork/hat-mockup-navy.jpg` }],
     artworkUrl: `${SITE}/artwork/hat-logo-dark.png`,
     artworkFileType: 'front_dtf_hat',
+    sizeChart: {
+      note: 'One Size Fits Most. Adjustable metal snap closure fits head circumferences ~21¾"–25¼".'
+    },
     options: [],
     variants: [
       { id: 24540, price: 2499, is_enabled: true, title: 'Navy / One Size', options: [] }

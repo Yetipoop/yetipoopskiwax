@@ -144,6 +144,21 @@
         </div>
       `).join('');
 
+      // Size chart (collapsible)
+      const sc = p.sizeChart;
+      const sizeChartHtml = sc ? (() => {
+        const tableHtml = (sc.headers && sc.rows) ? `
+          <table class="size-chart-table">
+            <thead><tr>${sc.headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+            <tbody>${sc.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+          </table>` : '';
+        const noteHtml = sc.note ? `<p class="size-chart-note">${sc.note}</p>` : '';
+        return `<details class="size-chart">
+          <summary class="size-chart-toggle">Size chart</summary>
+          <div class="size-chart-body">${tableHtml}${noteHtml}</div>
+        </details>`;
+      })() : '';
+
       // Thumbnails
       const thumbHtml = (p.images || []).slice(0, 5).map((img, i) => `
         <img src="${img.src}" class="product-thumb ${i === 0 ? 'active' : ''}"
@@ -165,6 +180,7 @@
             <div class="product-price">${price}</div>
             <div class="product-description">${p.description || ''}</div>
             ${optionHtml}
+            ${sizeChartHtml}
             <button class="add-to-cart-btn" id="atc-btn" onclick="addToCart()" disabled>
               Select options
             </button>
