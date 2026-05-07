@@ -226,8 +226,12 @@
           <input id="aff-email" type="email" placeholder="Optional">
         </div>
         <div class="form-group">
-          <label>Commission Rate</label>
+          <label>Commission Rate (what we pay them)</label>
           <input id="aff-rate" type="number" placeholder="e.g. 0.10" min="0" max="1" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Discount Rate (what customers get)</label>
+          <input id="aff-discount-rate" type="number" placeholder="e.g. 0.15" min="0" max="1" step="0.01">
         </div>
         <div class="form-group">
           <label>Notes</label>
@@ -446,7 +450,7 @@
 
     wrap.innerHTML = `<table>
       <thead><tr>
-        <th>Name</th><th>Email</th><th>Rate</th>
+        <th>Name</th><th>Email</th><th>Commission</th><th>Discount</th>
         <th>Earned</th><th>Paid</th><th>Outstanding</th><th>Status</th><th></th>
       </tr></thead>
       <tbody>${data.affiliates.map(a => `
@@ -454,6 +458,7 @@
           <td>${a.name}</td>
           <td>${a.email || '—'}</td>
           <td>${(a.commission_rate * 100).toFixed(0)}%</td>
+          <td>${a.discount_rate > 0 ? (a.discount_rate * 100).toFixed(0) + '%' : '—'}</td>
           <td>${fmt$(a.total_earned_cents)}</td>
           <td>${fmt$(a.total_paid_cents)}</td>
           <td style="color:${a.outstanding_cents > 0 ? '#F7813E' : '#fffce3'}">${fmt$(a.outstanding_cents)}</td>
@@ -470,6 +475,7 @@
     const name = document.getElementById('aff-name').value.trim();
     const email = document.getElementById('aff-email').value.trim();
     const rate = parseFloat(document.getElementById('aff-rate').value);
+    const discountRate = parseFloat(document.getElementById('aff-discount-rate').value) || 0;
     const notes = document.getElementById('aff-notes').value.trim();
     const msgEl = document.getElementById('create-aff-msg');
 
@@ -477,13 +483,13 @@
 
     const data = await apiFetch('/api/admin/affiliates', {
       method: 'POST',
-      body: JSON.stringify({ name, email: email || null, commission_rate: rate, notes: notes || null })
+      body: JSON.stringify({ name, email: email || null, commission_rate: rate, discount_rate: discountRate, notes: notes || null })
     });
     if (data.error) {
       msgEl.innerHTML = `<span class="error-msg">${data.error}</span>`;
     } else {
       msgEl.innerHTML = '<span class="success-msg">Affiliate added.</span>';
-      ['aff-name','aff-email','aff-rate','aff-notes'].forEach(id => document.getElementById(id).value = '');
+      ['aff-name','aff-email','aff-rate','aff-discount-rate','aff-notes'].forEach(id => document.getElementById(id).value = '');
       loadAffiliates();
     }
   }

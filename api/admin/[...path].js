@@ -100,6 +100,8 @@ module.exports = async function handler(req, res) {
       `;
       await sql`CREATE INDEX IF NOT EXISTS idx_discount_codes_code ON discount_codes (UPPER(code))`;
       await sql`CREATE INDEX IF NOT EXISTS idx_discount_code_usages_email_code ON discount_code_usages (customer_email, code_id)`;
+      // Migrations
+      await sql`ALTER TABLE affiliates ADD COLUMN IF NOT EXISTS discount_rate NUMERIC(5,4) NOT NULL DEFAULT 0`;
       return res.status(200).json({ ok: true, message: 'All tables created (or already existed).' });
     } catch (e) {
       return res.status(500).json({ error: e.message });
@@ -205,15 +207,15 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { name, email, commission_rate, notes } = req.body || {};
+      const { name, email, commission_rate, discount_rate, notes } = req.body || {};
       if (!name || commission_rate === undefined)
         return res.status(400).json({ error: 'name and commission_rate are required' });
       if (commission_rate < 0 || commission_rate > 1)
         return res.status(400).json({ error: 'commission_rate must be between 0 and 1' });
       try {
         const rows = await sql`
-          INSERT INTO affiliates (name, email, commission_rate, notes)
-          VALUES (${name}, ${email || null}, ${commission_rate}, ${notes || null})
+          INSERT INTO affiliates (name, email, commission_rate, discount_rate, notes)
+          VALUES (${name}, ${email || null}, ${commission_rate}, ${discount_rate || 0}, ${notes || null})
           RETURNING *
         `;
         return res.status(201).json({ affiliate: rows[0] });
@@ -223,13 +225,14 @@ module.exports = async function handler(req, res) {
     if (req.method === 'PATCH') {
       const id = req.query?.id;
       if (!id) return res.status(400).json({ error: 'id query param required' });
-      const { name, email, commission_rate, notes, is_active } = req.body || {};
+      const { name, email, commission_rate, discount_rate, notes, is_active } = req.body || {};
       try {
         const rows = await sql`
           UPDATE affiliates SET
             name            = COALESCE(${name || null}, name),
             email           = COALESCE(${email || null}, email),
             commission_rate = COALESCE(${commission_rate !== undefined ? commission_rate : null}, commission_rate),
+            discount_rate   = COALESCE(${discount_rate !== undefined ? discount_rate : null}, discount_rate),
             notes           = COALESCE(${notes || null}, notes),
             is_active       = COALESCE(${is_active !== undefined ? is_active : null}, is_active)
           WHERE id = ${id} RETURNING *
