@@ -10,26 +10,12 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" type="image/png" href="/images/logo-dark.png">
   <style>
-    .returns-section {
-      min-height: 80vh;
-      padding: 80px 20px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-    }
-    .returns-card {
-      background: var(--bg-card);
-      border-radius: 12px;
-      padding: 40px;
-      max-width: 540px;
-      width: 100%;
-    }
+    .returns-section { min-height: 80vh; padding: 80px 20px; display: flex; align-items: flex-start; justify-content: center; }
+    .returns-card { background: var(--bg-card); border-radius: 12px; padding: 40px; max-width: 540px; width: 100%; }
     .returns-card h1 { color: var(--teal); font-size: 28px; margin: 0 0 8px; }
     .subtitle { color: var(--text); opacity: 0.7; margin: 0 0 32px; font-size: 15px; line-height: 1.5; }
-
     .step { display: none; }
     .step.active { display: block; }
-
     label { display: block; color: var(--text); margin-bottom: 6px; font-size: 14px; }
     input[type="text"], input[type="email"] {
       width: 100%; box-sizing: border-box;
@@ -38,7 +24,6 @@
       font-size: 15px; margin-bottom: 20px; outline: none;
     }
     input[type="text"]:focus, input[type="email"]:focus { border-color: var(--teal); }
-
     .issue-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
     .issue-option {
       background: var(--bg); border: 2px solid var(--border);
@@ -49,39 +34,24 @@
     .issue-option input[type="radio"] { display: none; }
     .issue-option .issue-title { color: var(--text); font-size: 15px; margin: 0 0 4px; }
     .issue-option .issue-desc { color: var(--text); opacity: 0.6; font-size: 13px; margin: 0; }
-
     .photo-section {
-      background: var(--bg);
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.15s;
-      display: none;
+      background: var(--bg); border: 2px dashed var(--border); border-radius: 8px;
+      padding: 20px; margin-bottom: 20px; text-align: center; cursor: pointer;
+      transition: border-color 0.15s; display: none;
     }
     .photo-section:hover { border-color: var(--teal); }
     .photo-section.has-photo { border-color: var(--teal); border-style: solid; }
     .photo-section input[type="file"] { display: none; }
     .photo-label { color: var(--text); opacity: 0.7; font-size: 14px; margin: 0 0 4px; }
     .photo-required-badge {
-      display: inline-block;
-      background: var(--teal);
-      color: #fff;
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 4px;
-      margin-left: 6px;
-      vertical-align: middle;
+      display: inline-block; background: var(--teal); color: #fff;
+      font-size: 11px; padding: 2px 7px; border-radius: 4px; margin-left: 6px; vertical-align: middle;
     }
     .photo-preview { max-width: 100%; max-height: 160px; border-radius: 6px; margin-top: 10px; display: none; }
     .photo-hint { color: var(--text); opacity: 0.5; font-size: 12px; margin: 6px 0 0; }
-
     .order-summary { background: var(--bg); border-radius: 8px; padding: 16px; margin-bottom: 24px; }
     .order-summary .order-ref { color: var(--teal); font-size: 13px; margin: 0 0 8px; }
     .order-summary .order-items { color: var(--text); font-size: 14px; margin: 0; line-height: 1.7; }
-
     .btn-primary {
       background: var(--teal); color: #fff; border: none; border-radius: 6px;
       padding: 13px 28px; font-family: var(--font-body); font-size: 15px;
@@ -95,7 +65,6 @@
       font-size: 14px; cursor: pointer; margin-bottom: 16px; opacity: 0.7;
     }
     .btn-back:hover { opacity: 1; }
-
     .error-msg {
       background: #8B1A1A44; border: 1px solid #c0392b; color: #ff8888;
       border-radius: 6px; padding: 12px 14px; font-size: 14px; margin-bottom: 16px; display: none;
@@ -135,15 +104,11 @@
       <div class="step active" id="step-1">
         <h1>Returns &amp; Replacements</h1>
         <p class="subtitle">Got the wrong item, a damaged product, or something never showed up? Submit a claim and we'll review it within 1 business day.</p>
-
         <div class="error-msg" id="lookup-error"></div>
-
         <label for="order-ref">Order reference</label>
         <input type="text" id="order-ref" placeholder="Found in your confirmation email" autocomplete="off">
-
         <label for="cust-email">Email used at checkout</label>
         <input type="email" id="cust-email" placeholder="you@example.com" autocomplete="email">
-
         <button class="btn-primary" id="lookup-btn" onclick="lookupOrder()">Look up order</button>
       </div>
 
@@ -151,41 +116,36 @@
       <div class="step" id="step-2">
         <button class="btn-back" onclick="goToStep(1)">&#8592; Back</button>
         <h1>What went wrong?</h1>
-
         <div class="order-summary" id="order-summary"></div>
         <div class="error-msg" id="issue-error"></div>
-
         <div class="issue-options">
           <label class="issue-option" id="opt-wrong_item" onclick="onIssueSelect('wrong_item')">
             <input type="radio" name="issue" value="wrong_item">
             <p class="issue-title">Wrong item received</p>
-            <p class="issue-desc">Got the wrong size, color, or product → replacement will be sent</p>
+            <p class="issue-desc">Got the wrong size, color, or product &rarr; replacement will be sent</p>
           </label>
           <label class="issue-option" id="opt-damaged" onclick="onIssueSelect('damaged')">
             <input type="radio" name="issue" value="damaged">
             <p class="issue-title">Item arrived damaged <span class="photo-required-badge">photo required</span></p>
-            <p class="issue-desc">Physical damage from shipping → replacement will be sent</p>
+            <p class="issue-desc">Physical damage from shipping &rarr; replacement will be sent</p>
           </label>
           <label class="issue-option" id="opt-print_quality" onclick="onIssueSelect('print_quality')">
             <input type="radio" name="issue" value="print_quality">
             <p class="issue-title">Print quality defect <span class="photo-required-badge">photo required</span></p>
-            <p class="issue-desc">Fading, misprint, or poor quality → replacement will be sent</p>
+            <p class="issue-desc">Fading, misprint, or poor quality &rarr; replacement will be sent</p>
           </label>
           <label class="issue-option" id="opt-lost" onclick="onIssueSelect('lost')">
             <input type="radio" name="issue" value="lost">
             <p class="issue-title">Never arrived</p>
-            <p class="issue-desc">No delivery after 3+ weeks → full refund</p>
+            <p class="issue-desc">No delivery after 3+ weeks &rarr; full refund</p>
           </label>
         </div>
-
-        <!-- Photo upload (shown for damaged / print_quality) -->
         <div class="photo-section" id="photo-section" onclick="document.getElementById('photo-input').click()">
           <input type="file" id="photo-input" accept="image/*" onchange="onPhotoSelected(event)">
-          <p class="photo-label">📷 Tap to attach a photo of the issue</p>
+          <p class="photo-label">&#128247; Tap to attach a photo of the issue</p>
           <img id="photo-preview" class="photo-preview" alt="Preview">
-          <p class="photo-hint">JPEG or PNG, max 10MB — compressed automatically</p>
+          <p class="photo-hint">JPEG or PNG, compressed automatically</p>
         </div>
-
         <button class="btn-primary" id="submit-btn" onclick="submitClaim()">Submit claim</button>
       </div>
 
@@ -233,11 +193,7 @@
       });
     }
 
-    function showError(elId, msg) {
-      const el = document.getElementById(elId);
-      el.textContent = msg;
-      el.style.display = 'block';
-    }
+    function showError(elId, msg) { const el = document.getElementById(elId); el.textContent = msg; el.style.display = 'block'; }
     function hideError(elId) { document.getElementById(elId).style.display = 'none'; }
 
     async function lookupOrder() {
@@ -250,10 +206,10 @@
       btn.disabled = true; btn.textContent = 'Looking up...';
 
       try {
-        const res = await fetch('/api/order-lookup', {
+        const res = await fetch('/api/claims', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, email })
+          body: JSON.stringify({ type: 'lookup', sessionId, email })
         });
         const data = await res.json();
         if (!res.ok) return showError('lookup-error', data.error || 'Order not found.');
@@ -263,7 +219,7 @@
 
         const date = new Date(data.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         document.getElementById('order-summary').innerHTML =
-          `<p class="order-ref">Order from ${date}</p><p class="order-items">${data.items.join('<br>')}</p>`;
+          '<p class="order-ref">Order from ' + date + '</p><p class="order-items">' + data.items.join('<br>') + '</p>';
 
         goToStep(2);
       } catch (e) {
@@ -276,7 +232,7 @@
     function onIssueSelect(type) {
       document.querySelectorAll('.issue-option').forEach(o => o.classList.remove('selected'));
       document.getElementById('opt-' + type).classList.add('selected');
-      document.querySelector(`input[value="${type}"]`).checked = true;
+      document.querySelector('input[value="' + type + '"]').checked = true;
 
       const photoSection = document.getElementById('photo-section');
       if (PHOTO_REQUIRED.includes(type)) {
@@ -292,8 +248,6 @@
     function onPhotoSelected(event) {
       const file = event.target.files[0];
       if (!file) return;
-
-      // Compress to max ~800px and 300KB via canvas
       const reader = new FileReader();
       reader.onload = function(e) {
         const img = new Image();
@@ -308,7 +262,6 @@
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           photoBase64 = canvas.toDataURL('image/jpeg', 0.8);
-
           const preview = document.getElementById('photo-preview');
           preview.src = photoBase64;
           preview.style.display = 'block';
@@ -323,7 +276,6 @@
       hideError('issue-error');
       const selected = document.querySelector('input[name="issue"]:checked');
       if (!selected) return showError('issue-error', 'Please select what went wrong with your order.');
-
       if (PHOTO_REQUIRED.includes(selected.value) && !photoBase64) {
         return showError('issue-error', 'Please attach a photo — it\'s required for this type of claim.');
       }
@@ -332,10 +284,10 @@
       btn.disabled = true; btn.textContent = 'Submitting...';
 
       try {
-        const body = { sessionId: currentSessionId, email: currentEmail, issueType: selected.value };
+        const body = { type: 'submit', sessionId: currentSessionId, email: currentEmail, issueType: selected.value };
         if (photoBase64) body.photoBase64 = photoBase64;
 
-        const res = await fetch('/api/submit-claim', {
+        const res = await fetch('/api/claims', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
