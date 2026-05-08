@@ -246,7 +246,10 @@ module.exports = async function handler(req, res) {
       const id = req.query?.id;
       if (!id) return res.status(400).json({ error: 'id query param required' });
       try {
-        await sql`UPDATE affiliates SET is_active = false WHERE id = ${id}`;
+        await sql`UPDATE discount_codes SET affiliate_id = NULL WHERE affiliate_id = ${id}`;
+        await sql`DELETE FROM commission_ledger WHERE affiliate_id = ${id}`;
+        await sql`DELETE FROM commission_payments WHERE affiliate_id = ${id}`;
+        await sql`DELETE FROM affiliates WHERE id = ${id}`;
         return res.status(200).json({ ok: true });
       } catch (e) { return res.status(500).json({ error: e.message }); }
     }

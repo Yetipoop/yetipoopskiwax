@@ -463,8 +463,11 @@
           <td>${fmt$(a.total_paid_cents)}</td>
           <td style="color:${a.outstanding_cents > 0 ? '#F7813E' : '#fffce3'}">${fmt$(a.outstanding_cents)}</td>
           <td><span class="badge ${a.is_active ? 'badge-green' : 'badge-red'}">${a.is_active ? 'Active' : 'Inactive'}</span></td>
-          <td>
-            <button class="btn btn-sm btn-ghost" onclick="toggleAffiliate(${a.id}, ${a.is_active})">${a.is_active ? 'Deactivate' : 'Reactivate'}</button>
+          <td style="white-space:nowrap">
+            ${a.is_active
+              ? `<button class="btn btn-sm btn-ghost" onclick="setAffiliateActive(${a.id},false)">Deactivate</button>`
+              : `<button class="btn btn-sm btn-ghost" onclick="setAffiliateActive(${a.id},true)">Reactivate</button>`}
+            <button class="btn btn-sm btn-danger" onclick="deleteAffiliate(${a.id},'${a.name.replace(/'/g,"\\'")}')" style="margin-left:4px">Delete</button>
           </td>
         </tr>`).join('')}
       </tbody>
@@ -494,11 +497,19 @@
     }
   }
 
-  async function toggleAffiliate(id, currentlyActive) {
-    await apiFetch(`/api/admin/affiliates?id=${id}`, {
+  async function setAffiliateActive(id, active) {
+    const data = await apiFetch(`/api/admin/affiliates?id=${id}`, {
       method: 'PATCH',
-      body: JSON.stringify({ is_active: !currentlyActive })
+      body: JSON.stringify({ is_active: active })
     });
+    if (data.error) { alert(data.error); return; }
+    loadAffiliates();
+  }
+
+  async function deleteAffiliate(id, name) {
+    if (!confirm(`Permanently delete ${name}? This cannot be undone.`)) return;
+    const data = await apiFetch(`/api/admin/affiliates?id=${id}`, { method: 'DELETE' });
+    if (data.error) { alert(data.error); return; }
     loadAffiliates();
   }
 
