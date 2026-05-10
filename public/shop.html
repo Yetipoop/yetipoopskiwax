@@ -77,6 +77,19 @@
             ? '$' + (p.variants[0].price / 100).toFixed(2)
             : '';
           const img = p.images?.[0]?.src || '/images/logo-dark.png';
+          if (p.soldOut) {
+            return `
+              <div class="product-card product-card--sold-out">
+                <div class="product-card-img${p.imageContain ? ' product-card-img--contain' : ''}">
+                  <img src="${img}" alt="${p.title}" loading="lazy">
+                  <div class="sold-out-badge">Sold Out</div>
+                </div>
+                <div class="product-card-body">
+                  <div class="product-card-name">${p.title}</div>
+                  <div class="product-card-price">${price}</div>
+                </div>
+              </div>`;
+          }
           return `
             <a class="product-card" href="/product.html?id=${p.id}">
               <div class="product-card-img${p.imageContain ? ' product-card-img--contain' : ''}">

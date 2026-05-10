@@ -291,6 +291,7 @@ const products = [
   },
   {
     id: 'yeti-hat',
+    soldOut: true,
     title: 'Dad hat',
     description: 'Do you want to be the only dad not flaunting his superior taste in scatalogical ski wax after Father\'s Day? We didn\'t think so.',
     images: [{ src: `${SITE}/artwork/hat-mockup-navy.jpg` }],

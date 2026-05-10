@@ -197,6 +197,14 @@
         }
       });
 
+      // If sold out, keep button disabled and label it.
+      if (p.soldOut) {
+        const atcBtn = document.getElementById('atc-btn');
+        atcBtn.disabled = true;
+        atcBtn.textContent = 'Sold Out';
+        return;
+      }
+
       // If there are no options at all, enable the button right away.
       if (options.length === 0) {
         const atcBtn = document.getElementById('atc-btn');
